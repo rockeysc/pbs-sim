@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prebid Server Training Simulator</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
+</head>
+
+<body>
+    <!-- ============================================
+         HEADER SECTION
+         ============================================ -->
+    <header class="main-header">
+        <div class="header-content">
+            <h1>Prebid Server Training Simulator</h1>
+            <p class="header-subtitle">Interactive End-to-End Header Bidding Workflow</p>
+        </div>
+        <button class="help-toggle" id="helpToggle" aria-label="Toggle help panel">
+            <span class="help-icon">?</span>
+            <span class="help-text">Help</span>
+        </button>
+    </header>
+
+    <!-- ============================================
+         MAIN APPLICATION CONTAINER
+         ============================================ -->
+    <div class="app-container">
+
+        <!-- ============================================
+             HELP SIDEBAR
+             ============================================ -->
+        <aside class="help-sidebar" id="helpSidebar">
+            <div class="help-header">
+                <h2>Prebid Server Concepts</h2>
+                <button class="close-help" id="closeHelp" aria-label="Close help panel">&times;</button>
+            </div>
+            <div class="help-content">
+                <section class="help-section">
+                    <h3>What is Prebid Server?</h3>
+                    <p>Prebid Server is an open-source solution for server-to-server header bidding. It moves the
+                        auction logic from the browser to a server, reducing page latency and enabling more demand
+                        sources.</p>
+                </section>
+
+                <section class="help-section">
+                    <h3>Key Terms</h3>
+                    <dl class="glossary">
+                        <dt>Header Bidding</dt>
+                        <dd>An advanced programmatic technique where publishers offer inventory to multiple ad exchanges
+                            simultaneously before making calls to their ad servers.</dd>
+
+                        <dt>SSP (Supply-Side Platform)</dt>
+                        <dd>Technology platform that enables publishers to manage, sell, and optimize their available ad
+                            inventory.</dd>
+
+                        <dt>OpenRTB</dt>
+                        <dd>Open Real-Time Bidding protocol - an industry standard for programmatic advertising
+                            communication between buyers and sellers.</dd>
+
+                        <dt>Price Granularity</dt>
+                        <dd>Determines how bid prices are rounded into price buckets for targeting in the ad server.
+                        </dd>
+
+                        <dt>Bid Adapter</dt>
+                        <dd>Code that translates Prebid's internal auction format into a bidder's specific API format.
+                        </dd>
+
+                        <dt>Floor Price</dt>
+                        <dd>The minimum price a publisher will accept for an ad impression.</dd>
+
+                        <dt>First-Price Auction</dt>
+                        <dd>Winner pays exactly what they bid.</dd>
+
+                        <dt>Second-Price Auction</dt>
+                        <dd>Winner pays $0.01 more than the second-highest bid.</dd>
+                    </dl>
+                </section>
+
+                <section class="help-section">
+                    <h3>Workflow Phases</h3>
+                    <ol class="phase-list">
+                        <li><strong>Request Initiation:</strong> Publisher page constructs and sends ad request</li>
+                        <li><strong>Bidder Adapters:</strong> Request is transformed for each enabled bidder</li>
+                        <li><strong>Auction:</strong> Bids are collected and evaluated</li>
+                        <li><strong>Post-Auction:</strong> Floors enforced, currency converted, winner selected</li>
+                        <li><strong>Rendering:</strong> Winning creative is displayed</li>
+                    </ol>
+                </section>
+
+                <section class="help-section">
+                    <h3>Bid Request</h3>
+                    <p>A <strong>bid request</strong> is an OpenRTB-formatted message sent by Prebid Server to each
+                        demand partner. It describes the ad opportunity in a standardised way so any compliant
+                        bidder can respond.</p>
+                    <dl class="glossary">
+                        <dt>imp</dt>
+                        <dd>Impression object — describes the ad slot (size, format, floor price) that the bidder is
+                            being asked to fill.</dd>
+                        <dt>tmax</dt>
+                        <dd>Maximum response time in milliseconds. Bidders that don't reply within this window are
+                            excluded from the auction entirely.</dd>
+                        <dt>bidfloor</dt>
+                        <dd>The minimum CPM the publisher will accept. Any bid below this value is rejected before
+                            the auction even begins.</dd>
+                        <dt>ext.prebid</dt>
+                        <dd>Prebid-specific extensions — carries targeting config, price granularity, enabled bidder
+                            list, and feature flags to the server.</dd>
+                    </dl>
+                </section>
+
+                <section class="help-section">
+                    <h3>Bid Response</h3>
+                    <p>A <strong>bid response</strong> is the OpenRTB reply a demand partner sends back to Prebid
+                        Server. It contains the price the buyer is willing to pay and the creative that will render
+                        if the bid wins.</p>
+                    <dl class="glossary">
+                        <dt>seatbid</dt>
+                        <dd>Bids grouped by buyer seat (DSP or SSP account). Each seat can submit one or more bids
+                            against the impression objects in the request.</dd>
+                        <dt>price</dt>
+                        <dd>The CPM the bidder is willing to pay. PBS compares this against the floor price and all
+                            other seat bids to determine the winner.</dd>
+                        <dt>adm</dt>
+                        <dd>Ad markup — the HTML, JavaScript, or VAST XML that gets rendered in the browser when
+                            this bid wins. Typically retrieved from Prebid Cache at render time.</dd>
+                        <dt>ext.prebid.targeting</dt>
+                        <dd>Key-value pairs (e.g. <code>hb_pb</code>, <code>hb_bidder</code>) sent to the ad
+                            server so it can identify and load the winning creative.</dd>
+                        <dt>ext.prebid.cache</dt>
+                        <dd>Cache entry URL where the creative is stored. The ad server calls this URL at
+                            impression time to retrieve the actual ad markup.</dd>
+                    </dl>
+                </section>
+
+                <section class="help-section">
+                    <h3>S2S Configuration</h3>
+                    <p>The <strong>s2sConfig</strong> object tells Prebid.js how to hand off auction work to
+                        Prebid Server instead of running adapters client-side in the browser.</p>
+                    <dl class="glossary">
+                        <dt>adapter</dt>
+                        <dd><code>"prebidServer"</code> — the built-in Prebid.js module that packages the bid
+                            request and communicates with your PBS endpoint.</dd>
+                        <dt>bidders</dt>
+                        <dd>The list of demand partner IDs that PBS will call server-side. Bidders here bypass
+                            client-side JavaScript entirely, reducing page load time.</dd>
+                        <dt>endpoint</dt>
+                        <dd>The PBS auction URL. Accepts separate values for users who have given first-party
+                            consent (<code>p1Consent</code>) and those who have not (<code>noP1Consent</code>).</dd>
+                        <dt>timeout / maxTimeout</dt>
+                        <dd><code>timeout</code> is the target response window; <code>maxTimeout</code> is the
+                            hard ceiling PBS enforces — any configured value above it is clamped.</dd>
+                        <dt>syncEndpoint</dt>
+                        <dd>The PBS cookie-sync URL. PBS calls this to align user identifiers across demand
+                            partners, improving bid match rates.</dd>
+                        <dt>allowUnknownBidderCodes</dt>
+                        <dd>When <code>true</code>, PBS passes through bids from adapters that aren't explicitly
+                            listed in <code>bidders[]</code> — useful for catching demand from alias adapters.</dd>
+                    </dl>
+                </section>
+            </div>
+        </aside>
+
+        <!-- ============================================
+             LEFT PANEL - CONFIGURATION
+             ============================================ -->
+        <section class="config-panel">
+            <div class="panel-header">
+                <h2>Configuration</h2>
+            </div>
+
+            <!-- Preset Scenarios -->
+            <div class="config-section">
+                <h3>Preset Scenarios</h3>
+                <div class="preset-buttons">
+                    <button class="preset-btn" data-preset="basic">
+                        <span class="preset-icon material-icons-round">assignment</span>
+                        <span class="preset-name">Basic Setup</span>
+                    </button>
+                    <button class="preset-btn" data-preset="timeout">
+                        <span class="preset-icon material-icons-round">timer</span>
+                        <span class="preset-name">Timeout Impact</span>
+                    </button>
+                    <button class="preset-btn" data-preset="floor">
+                        <span class="preset-icon material-icons-round">bar_chart</span>
+                        <span class="preset-name">Price Floors</span>
+                    </button>
+                    <button class="preset-btn" data-preset="currency">
+                        <span class="preset-icon material-icons-round">currency_exchange</span>
+                        <span class="preset-name">Multi-Currency</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bidder Settings -->
+            <div class="config-section">
+                <h3>
+                    Bidder Settings
+                    <span class="tooltip-trigger"
+                        data-tooltip="Configure which demand partners participate in the auction">ⓘ</span>
+                </h3>
+                <div class="bidder-list" id="bidderList">
+                    <!-- Bidders will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Auction Settings -->
+            <div class="config-section">
+                <h3>
+                    Auction Settings
+                    <span class="tooltip-trigger" data-tooltip="Control how the auction is conducted">ⓘ</span>
+                </h3>
+
+                <div class="setting-group">
+                    <label for="timeoutSlider">
+                        Timeout: <span id="timeoutValue">1000</span>ms
+                        <span class="tooltip-trigger"
+                            data-tooltip="Maximum time to wait for bid responses. Lower values improve page speed but may exclude slower bidders.">ⓘ</span>
+                    </label>
+                    <input type="range" id="timeoutSlider" min="100" max="3000" value="1000" step="100">
+                    <div class="slider-labels">
+                        <span>100ms</span>
+                        <span>3000ms</span>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label>
+                        Auction Type
+                        <span class="tooltip-trigger"
+                            data-tooltip="First-price: winner pays their bid. Second-price: winner pays $0.01 above second-highest bid.">ⓘ</span>
+                    </label>
+                    <div class="toggle-group">
+                        <button class="toggle-btn active" data-auction-type="first-price">First Price</button>
+                        <button class="toggle-btn" data-auction-type="second-price">Second Price</button>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label for="priceGranularity">
+                        Price Granularity
+                        <span class="tooltip-trigger"
+                            data-tooltip="Determines how bid prices are bucketed for ad server targeting">ⓘ</span>
+                    </label>
+                    <select id="priceGranularity">
+                        <option value="low">Low ($0.50 increments)</option>
+                        <option value="medium" selected>Medium ($0.10 increments)</option>
+                        <option value="high">High ($0.01 increments)</option>
+                        <option value="auto">Auto (variable)</option>
+                        <option value="dense">Dense ($0.01 up to $3, then $0.10)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Price Floor Settings -->
+            <div class="config-section">
+                <h3>
+                    Price Floors
+                    <span class="tooltip-trigger" data-tooltip="Set minimum acceptable bid prices">ⓘ</span>
+                </h3>
+
+                <div class="setting-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="enableFloors">
+                        <span>Enable Price Floors</span>
+                    </label>
+                </div>
+
+                <div class="floor-settings" id="floorSettings">
+                    <div class="setting-group">
+                        <label for="floorPrice">
+                            Floor Price: $<span id="floorValue">0.50</span>
+                        </label>
+                        <input type="range" id="floorPrice" min="0" max="5" value="0.5" step="0.1">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Currency Settings -->
+            <div class="config-section">
+                <h3>
+                    Currency Settings
+                    <span class="tooltip-trigger"
+                        data-tooltip="Configure multi-currency support for international bidders">ⓘ</span>
+                </h3>
+
+                <div class="setting-group">
+                    <label for="primaryCurrency">Primary Currency</label>
+                    <select id="primaryCurrency">
+                        <option value="USD" selected>USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="GBP">GBP (£)</option>
+                    </select>
+                </div>
+
+                <div class="setting-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="enableCurrencyConversion" checked>
+                        <span>Enable Currency Conversion</span>
+                    </label>
+                </div>
+
+                <div class="exchange-rates" id="exchangeRates">
+                    <div class="rate-display">
+                        <span>1 USD = 0.92 EUR</span>
+                        <span>1 USD = 0.79 GBP</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Save/Load Configuration -->
+            <div class="config-section">
+                <h3>Configuration Management</h3>
+                <div class="config-actions">
+                    <button class="action-btn" id="saveConfig">
+                        <span class="material-icons-round">save</span> Save Config
+                    </button>
+                    <button class="action-btn" id="loadConfig">
+                        <span class="material-icons-round">folder_open</span> Load Config
+                    </button>
+                    <button class="action-btn" id="resetConfig">
+                        <span class="material-icons-round">restart_alt</span> Reset
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================
+             CENTER PANEL - WORKFLOW VISUALIZATION
+             ============================================ -->
+        <main class="workflow-panel">
+            <!-- Simulation Controls -->
+            <div class="simulation-controls">
+                <button class="control-btn primary" id="startSimulation">
+                    <span class="btn-icon material-icons-round">play_arrow</span>
+                    <span>Start Auction</span>
+                </button>
+                <button class="control-btn" id="resetSimulation">
+                    <span class="btn-icon material-icons-round">replay</span>
+                    <span>Reset</span>
+                </button>
+                <div class="speed-control">
+                    <label for="simulationSpeed">Speed:</label>
+                    <select id="simulationSpeed">
+                        <option value="0.5">0.5x</option>
+                        <option value="1" selected>1x</option>
+                        <option value="2">2x</option>
+                        <option value="3">3x</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Phase Indicator -->
+            <div class="phase-indicator">
+                <div class="phase" data-phase="request">
+                    <div class="phase-number">
+                        <span class="material-icons-round phase-icon">send</span>
+                    </div>
+                    <div class="phase-label">Request</div>
+                </div>
+                <div class="phase-connector"></div>
+                <div class="phase" data-phase="bidders">
+                    <div class="phase-number">
+                        <span class="material-icons-round phase-icon">hub</span>
+                    </div>
+                    <div class="phase-label">Bidders</div>
+                </div>
+                <div class="phase-connector"></div>
+                <div class="phase" data-phase="auction">
+                    <div class="phase-number">
+                        <span class="material-icons-round phase-icon">gavel</span>
+                    </div>
+                    <div class="phase-label">Auction</div>
+                </div>
+                <div class="phase-connector"></div>
+                <div class="phase" data-phase="post-auction">
+                    <div class="phase-number">
+                        <span class="material-icons-round phase-icon">tune</span>
+                    </div>
+                    <div class="phase-label">Post-Auction</div>
+                </div>
+                <div class="phase-connector"></div>
+                <div class="phase" data-phase="render">
+                    <div class="phase-number">
+                        <span class="material-icons-round phase-icon">web</span>
+                    </div>
+                    <div class="phase-label">Render</div>
+                </div>
+            </div>
+
+            <!-- Phase Navigation Banner (shown when viewing a past phase) -->
+            <div class="phase-nav-banner hidden" id="phaseNavBanner">
+                <span id="phaseNavText">Viewing Phase 1: Request Initiation</span>
+                <button class="phase-nav-return" id="phaseNavReturn">
+                    <span class="material-icons-round">undo</span> Return to current phase
+                </button>
+            </div>
+
+            <!-- Workflow Visualization Area (one phase visible at a time) -->
+            <div class="workflow-visualization" id="workflowVisualization">
+                <!-- Phase 1: Request Initiation -->
+                <div class="workflow-stage" id="requestStage">
+                    <div class="stage-header">
+                        <h3>Phase 1: Request Initiation</h3>
+                        <span class="stage-status" id="requestStatus">Waiting</span>
+                    </div>
+                    <div class="stage-content">
+                        <div class="publisher-page">
+                            <div class="page-icon"><span class="material-icons-round">article</span></div>
+                            <div class="page-label">Publisher Page</div>
+                            <div class="ad-slot">
+                                <span>Ad Slot</span>
+                                <span class="slot-size">300x250</span>
+                            </div>
+                        </div>
+                        <div class="request-arrow" id="requestArrow">
+                            <div class="arrow-line"></div>
+                            <div class="arrow-head"></div>
+                            <div class="arrow-label">OpenRTB Request</div>
+                        </div>
+                        <div class="prebid-server">
+                            <div class="server-icon"><span class="material-icons-round">dns</span></div>
+                            <div class="server-label">Prebid Server</div>
+                        </div>
+                    </div>
+                    <div class="code-blocks-row" id="requestCodeBlocks">
+                        <div class="request-details" id="requestDetails">
+                            <div class="request-details-header">
+                                <h4>Request Parameters</h4>
+                                <button class="request-expand-btn" id="requestExpandBtn" title="Expand code">
+                                    <span class="material-icons-round">open_in_full</span>
+                                </button>
+                            </div>
+                            <pre id="requestJson"></pre>
+                        </div>
+                        <div class="request-details" id="s2sConfigDetails">
+                            <div class="request-details-header">
+                                <h4>S2S Configuration</h4>
+                                <button class="request-expand-btn" id="s2sExpandBtn" title="Expand code">
+                                    <span class="material-icons-round">open_in_full</span>
+                                </button>
+                            </div>
+                            <pre id="s2sConfigJson"></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase 2: Bidder Adapters -->
+                <div class="workflow-stage" id="bidderStage">
+                    <div class="stage-header">
+                        <h3>Phase 2: Bidder Adapters</h3>
+                        <span class="stage-status" id="bidderStatus">Waiting</span>
+                    </div>
+                    <div class="stage-content">
+                        <div class="bidder-flow">
+                            <div class="prebid-server-mini">
+                                <div class="server-icon"><span class="material-icons-round">dns</span></div>
+                                <div class="server-label">PBS</div>
+                            </div>
+                            <div class="bidder-requests" id="bidderRequests">
+                                <!-- Bidder request animations will be added here -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="request-details" id="bidResponseDetails">
+                        <div class="request-details-header">
+                            <h4>Sample Bid Response</h4>
+                            <button class="request-expand-btn" id="bidResponseExpandBtn" title="Expand code">
+                                <span class="material-icons-round">open_in_full</span>
+                            </button>
+                        </div>
+                        <pre id="bidResponseJson"></pre>
+                    </div>
+                </div>
+
+                <!-- Phase 3: Auction Mechanics -->
+                <div class="workflow-stage" id="auctionStage">
+                    <div class="stage-header">
+                        <h3>Phase 3: Auction</h3>
+                        <span class="stage-status" id="auctionStatus">Waiting</span>
+                    </div>
+                    <div class="stage-content">
+                        <div class="auction-timeline">
+                            <div class="timeline-header">
+                                <span>0ms</span>
+                                <span class="timeout-marker" id="timeoutMarker">Timeout: 1000ms</span>
+                            </div>
+                            <div class="timeline-bar" id="timelineBar">
+                                <div class="timeline-progress" id="timelineProgress"></div>
+                                <div class="timeout-line" id="timeoutLine"></div>
+                            </div>
+                            <div class="bid-responses" id="bidResponses">
+                                <!-- Bid response markers will be added here -->
+                            </div>
+                        </div>
+                        <div class="bid-table-container">
+                            <table class="bid-table" id="bidTable">
+                                <thead>
+                                    <tr>
+                                        <th>Bidder</th>
+                                        <th>Bid Price</th>
+                                        <th>Currency</th>
+                                        <th>Response Time</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bidTableBody">
+                                    <!-- Bid rows will be added here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase 4: Post-Auction -->
+                <div class="workflow-stage" id="postAuctionStage">
+                    <div class="stage-header">
+                        <h3>Phase 4: Post-Auction Processing</h3>
+                        <span class="stage-status" id="postAuctionStatus">Waiting</span>
+                    </div>
+                    <div class="stage-content">
+                        <div class="post-auction-steps">
+                            <div class="processing-step" id="floorCheck">
+                                <div class="step-icon"><span class="material-icons-round">price_check</span></div>
+                                <div class="step-info">
+                                    <div class="step-name">Floor Enforcement</div>
+                                    <div class="step-detail" id="floorCheckDetail">-</div>
+                                </div>
+                            </div>
+                            <div class="processing-step" id="currencyConvert">
+                                <div class="step-icon"><span class="material-icons-round">currency_exchange</span></div>
+                                <div class="step-info">
+                                    <div class="step-name">Currency Conversion</div>
+                                    <div class="step-detail" id="currencyConvertDetail">-</div>
+                                </div>
+                            </div>
+                            <div class="processing-step" id="winnerSelect">
+                                <div class="step-icon"><span class="material-icons-round">emoji_events</span></div>
+                                <div class="step-info">
+                                    <div class="step-name">Winner Selection</div>
+                                    <div class="step-detail" id="winnerSelectDetail">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase 5: Ad Rendering -->
+                <div class="workflow-stage" id="renderStage">
+                    <div class="stage-header">
+                        <h3>Phase 5: Ad Rendering</h3>
+                        <span class="stage-status" id="renderStatus">Waiting</span>
+                    </div>
+                    <div class="stage-content">
+                        <div class="render-flow">
+                            <div class="winning-bid-info" id="winningBidInfo">
+                                <div class="winner-label">Winning Bid</div>
+                                <div class="winner-details" id="winnerDetails">-</div>
+                            </div>
+                            <div class="render-arrow">
+                                <div class="arrow-line"></div>
+                                <div class="arrow-head"></div>
+                            </div>
+                            <div class="rendered-ad" id="renderedAd">
+                                <div class="ad-placeholder">
+                                    <span>Ad Creative</span>
+                                    <span class="ad-size">300x250</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="analytics-events" id="analyticsEvents">
+                            <div class="event-item">
+                                <span class="event-icon material-icons-round">analytics</span>
+                                <span class="event-name">Impression Event</span>
+                                <span class="event-status" id="impressionEvent">Pending</span>
+                            </div>
+                            <div class="event-item">
+                                <span class="event-icon material-icons-round">payments</span>
+                                <span class="event-name">Billing Event</span>
+                                <span class="event-status" id="billingEvent">Pending</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phase Proceed Footer -->
+            <div class="phase-proceed-footer hidden" id="phaseProceedFooter">
+                <button class="phase-proceed-btn" id="phaseProceedBtn">
+                    <span id="phaseProceedText">Continue to Phase 2</span>
+                    <span class="phase-proceed-arrow material-icons-round">arrow_forward</span>
+                </button>
+            </div>
+        </main>
+
+        <!-- ============================================
+             RIGHT PANEL - RESULTS & FEEDBACK
+             ============================================ -->
+        <section class="results-panel">
+            <div class="panel-header">
+                <h2>Results & Insights</h2>
+            </div>
+
+            <!-- Real-time Feedback -->
+            <div class="results-section">
+                <h3>Real-time Feedback</h3>
+                <div class="feedback-messages" id="feedbackMessages">
+                    <div class="feedback-item info">
+                        <span class="feedback-icon material-icons-round">info</span>
+                        <span class="feedback-text">Configure settings and start the auction simulation.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Auction Summary -->
+            <div class="results-section">
+                <h3>Auction Summary</h3>
+                <div class="summary-stats" id="summaryStats">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Bidders</span>
+                        <span class="stat-value" id="totalBidders">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Bids Received</span>
+                        <span class="stat-value" id="bidsReceived">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Timed Out</span>
+                        <span class="stat-value" id="timedOut">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Below Floor</span>
+                        <span class="stat-value" id="belowFloor">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Winning Bid</span>
+                        <span class="stat-value highlight" id="winningBid">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Clearing Price</span>
+                        <span class="stat-value" id="clearingPrice">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Results Table -->
+            <div class="results-section">
+                <h3>Bid Details</h3>
+                <div class="results-table-container">
+                    <table class="results-table" id="resultsTable">
+                        <thead>
+                            <tr>
+                                <th>Bidder</th>
+                                <th>Original</th>
+                                <th>Converted</th>
+                                <th>Status</th>
+                                <th>Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTableBody">
+                            <tr>
+                                <td colspan="5" class="empty-state">Run simulation to see results</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Configuration Impact -->
+            <div class="results-section">
+                <h3>Configuration Impact</h3>
+                <div class="impact-analysis" id="impactAnalysis">
+                    <p class="impact-placeholder">Adjust configuration settings to see their impact on the auction.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ============================================
+         REQUEST PARAMS MODAL
+         ============================================ -->
+    <div class="code-modal-overlay hidden" id="requestModalOverlay">
+        <div class="code-modal" role="dialog" aria-modal="true" aria-label="Request Parameters">
+            <div class="code-modal-header">
+                <div class="code-modal-title">
+                    <span class="material-icons-round">code</span>
+                    <span>OpenRTB Request Parameters</span>
+                </div>
+                <button class="code-modal-close" id="requestModalClose" title="Close">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="code-modal-body">
+                <pre class="code-modal-pre" id="requestJsonModal"></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         S2S CONFIG MODAL
+         ============================================ -->
+    <div class="code-modal-overlay hidden" id="s2sModalOverlay">
+        <div class="code-modal" role="dialog" aria-modal="true" aria-label="S2S Configuration">
+            <div class="code-modal-header">
+                <div class="code-modal-title">
+                    <span class="material-icons-round">settings</span>
+                    <span>S2S Configuration</span>
+                </div>
+                <button class="code-modal-close" id="s2sModalClose" title="Close">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="code-modal-body">
+                <pre class="code-modal-pre" id="s2sJsonModal"></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         BID RESPONSE MODAL
+         ============================================ -->
+    <div class="code-modal-overlay hidden" id="bidResponseModalOverlay">
+        <div class="code-modal" role="dialog" aria-modal="true" aria-label="Sample Bid Response">
+            <div class="code-modal-header">
+                <div class="code-modal-title">
+                    <span class="material-icons-round">receipt_long</span>
+                    <span>Sample Bid Response</span>
+                </div>
+                <button class="code-modal-close" id="bidResponseModalClose" title="Close">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="code-modal-body">
+                <pre class="code-modal-pre" id="bidResponseJsonModal"></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         TOOLTIP CONTAINER
+         ============================================ -->
+    <div class="tooltip" id="tooltip"></div>
+
+    <!-- ============================================
+         NOTIFICATION CONTAINER
+         ============================================ -->
+    <div class="notification-container" id="notificationContainer"></div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

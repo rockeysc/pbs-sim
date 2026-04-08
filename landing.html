@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prebid Server — Learning Hub</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
+    <style>
+        /* ── Landing-page-specific overrides ── */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .landing-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: var(--spacing-xl) var(--spacing-xl);
+            text-align: center;
+        }
+
+        .landing-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .landing-header p {
+            font-size: 1.05rem;
+            opacity: 0.85;
+        }
+
+        .landing-main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-xl);
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--spacing-xl);
+            max-width: 780px;
+            width: 100%;
+        }
+
+        .landing-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: var(--spacing-xl);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+        }
+
+        .landing-card:hover:not(.card-disabled) {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .card-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--spacing-lg);
+            font-size: 2rem;
+        }
+
+        .card-icon--blue {
+            background: #dbeafe;
+            color: var(--primary-color);
+        }
+
+        .card-icon--green {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .landing-card h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-sm);
+            color: var(--text-primary);
+        }
+
+        .landing-card p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.55;
+            margin-bottom: var(--spacing-lg);
+            flex: 1;
+        }
+
+        .card-badge {
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 0.25rem 0.65rem;
+            border-radius: var(--radius-full);
+        }
+
+        .badge-coming-soon {
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+        }
+
+        .badge-launch {
+            background: var(--primary-color);
+            color: #fff;
+        }
+
+        .landing-footer {
+            text-align: center;
+            padding: var(--spacing-md) var(--spacing-xl);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+
+<body>
+    <header class="landing-header">
+        <h1>Prebid Server Learning Hub</h1>
+        <p>Select a module to get started</p>
+    </header>
+
+    <main class="landing-main">
+        <div class="card-grid">
+
+            <!-- Card 1: Presentation (placeholder) -->
+            <div class="landing-card card-disabled" aria-disabled="true" title="Coming soon">
+                <div class="card-icon card-icon--blue">
+                    <span class="material-icons-round" style="font-size:2rem;">slideshow</span>
+                </div>
+                <h2>Prebid Server Presentation</h2>
+                <p>An guided walkthrough of Prebid Server concepts, architecture, and key workflows — coming soon.</p>
+                <span class="card-badge badge-coming-soon">Coming Soon</span>
+            </div>
+
+            <!-- Card 2: Simulator (links to existing app) -->
+            <a class="landing-card" href="index.html" aria-label="Open the Prebid Server Training Simulator">
+                <div class="card-icon card-icon--green">
+                    <span class="material-icons-round" style="font-size:2rem;">play_circle</span>
+                </div>
+                <h2>Prebid Server Simulator</h2>
+                <p>Interactively simulate an end-to-end header bidding auction — configure bidders, set price floors,
+                    and watch the full Prebid Server workflow in action.</p>
+                <span class="card-badge badge-launch">Launch</span>
+            </a>
+
+        </div>
+    </main>
+
+    <footer class="landing-footer">
+        Prebid Server Learning Hub &mdash; Interactive Training Tools
+    </footer>
+</body>
+
+</html>
