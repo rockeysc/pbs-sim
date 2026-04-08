@@ -1277,6 +1277,16 @@ function generateOpenRTBRequest() {
           ? AppState.config.floorPrice
           : 0,
         bidfloorcur: AppState.config.primaryCurrency,
+        ext: {
+          prebid: {
+            bidder: Object.fromEntries(
+              enabledBidders.map((b) => [
+                b.id,
+                { placement: Math.floor(Math.random() * 90000) + 10000 },
+              ]),
+            ),
+          },
+        },
       },
     ],
     site: {
@@ -1311,6 +1321,18 @@ function generateOpenRTBRequest() {
       key: "bidfloor",
       comment:
         "Minimum acceptable bid price; bids below this are rejected by PBS",
+    },
+    {
+      ws: "      ",
+      key: "ext",
+      comment:
+        "Impression-level extensions — routes bidder-specific params to each adapter via ext.prebid.bidder",
+    },
+    {
+      ws: "              ",
+      key: "placement",
+      comment:
+        "Bidder-specific placement ID passed opaquely to the adapter; format varies per demand partner",
     },
     {
       ws: "  ",
@@ -1539,6 +1561,14 @@ function generateBidResponse() {
                   },
                 },
               },
+              bidder: {
+                [bidder.id]: {
+                  brand_id: 1,
+                  auction_id: Math.floor(Math.random() * 9e18) + 1e18,
+                  bidder_id: Math.floor(Math.random() * 9) + 1,
+                  bid_ad_type: 0,
+                },
+              },
             },
           },
         ],
@@ -1580,6 +1610,12 @@ function generateBidResponse() {
       key: "adomain",
       comment:
         "Advertiser domain — used for brand safety and competitive exclusions",
+    },
+    {
+      ws: "              ",
+      key: "bidder",
+      comment:
+        "Bidder-proprietary metadata (brand ID, auction ID, creative type) passed through opaquely by PBS",
     },
     {
       ws: "                ",
