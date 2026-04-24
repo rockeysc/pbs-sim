@@ -221,8 +221,6 @@ const DOM = {
   presetButtons: null,
 
   // Config actions
-  saveConfig: null,
-  loadConfig: null,
   resetConfig: null,
 
   // Simulation controls
@@ -338,7 +336,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initializeDOMReferences();
   initializeEventListeners();
   renderBidderList();
-  loadSavedConfig();
+
   updateUIFromState();
   addInitialFeedback();
 });
@@ -367,8 +365,6 @@ function initializeDOMReferences() {
   );
 
   // Config actions
-  DOM.saveConfig = document.getElementById("saveConfig");
-  DOM.loadConfig = document.getElementById("loadConfig");
   DOM.resetConfig = document.getElementById("resetConfig");
 
   // Simulation controls
@@ -513,8 +509,6 @@ function initializeEventListeners() {
   );
 
   // Config actions
-  DOM.saveConfig.addEventListener("click", saveConfiguration);
-  DOM.loadConfig.addEventListener("click", loadConfiguration);
   DOM.resetConfig.addEventListener("click", resetConfiguration);
 
   // Simulation controls
@@ -817,88 +811,6 @@ function loadPreset(presetId) {
 // ============================================
 // CONFIGURATION PERSISTENCE
 // ============================================
-
-/**
- * Save current configuration to localStorage
- */
-function saveConfiguration() {
-  const configToSave = {
-    config: AppState.config,
-    bidders: AppState.bidders.map((b) => ({ id: b.id, enabled: b.enabled })),
-  };
-
-  localStorage.setItem("prebidTrainerConfig", JSON.stringify(configToSave));
-  showNotification(
-    "success",
-    "Configuration Saved",
-    "Your settings have been saved to browser storage",
-  );
-}
-
-/**
- * Load configuration from localStorage
- */
-function loadConfiguration() {
-  const saved = localStorage.getItem("prebidTrainerConfig");
-  if (!saved) {
-    showNotification(
-      "info",
-      "No Saved Configuration",
-      "No previously saved configuration found",
-    );
-    return;
-  }
-
-  try {
-    const configData = JSON.parse(saved);
-
-    // Apply saved config
-    Object.assign(AppState.config, configData.config);
-
-    // Apply saved bidder states
-    configData.bidders.forEach((savedBidder) => {
-      const bidder = AppState.bidders.find((b) => b.id === savedBidder.id);
-      if (bidder) {
-        bidder.enabled = savedBidder.enabled;
-      }
-    });
-
-    updateUIFromState();
-    renderBidderList();
-    showNotification(
-      "success",
-      "Configuration Loaded",
-      "Your saved settings have been restored",
-    );
-  } catch (e) {
-    showNotification(
-      "error",
-      "Load Failed",
-      "Could not parse saved configuration",
-    );
-  }
-}
-
-/**
- * Load saved config on startup
- */
-function loadSavedConfig() {
-  const saved = localStorage.getItem("prebidTrainerConfig");
-  if (saved) {
-    try {
-      const configData = JSON.parse(saved);
-      Object.assign(AppState.config, configData.config);
-      configData.bidders?.forEach((savedBidder) => {
-        const bidder = AppState.bidders.find((b) => b.id === savedBidder.id);
-        if (bidder) {
-          bidder.enabled = savedBidder.enabled;
-        }
-      });
-    } catch (e) {
-      // Silently fail - use defaults
-    }
-  }
-}
 
 /**
  * Reset configuration to defaults
@@ -1402,7 +1314,33 @@ function annotateJson(json, notes) {
 }
 
 /**
- * Generate a Prebid Server S2S configuration object
+ * Map a price granularity label to its OpenRTB ranges definition.
+ * Returns a plain string for "auto", an object otherwise.
+ */
+function priceGranularityRanges(label) {
+  switch (label) {
+    case "low":
+      return { ranges: [{ max: 5.0, increment: 0.5 }] };
+    case "high":
+      return { ranges: [{ max: 20.0, increment: 0.01 }] };
+    case "dense":
+      return {
+        ranges: [
+          { min: 0, max: 3.0, increment: 0.01 },
+          { min: 3.0, max: 8.0, increment: 0.05 },
+        ],
+      };
+    case "auto":
+      return "auto";
+    case "medium":
+    default:
+      return { ranges: [{ max: 20.0, increment: 0.1 }] };
+  }
+}
+
+/**
+ * Generate a Prebid Server S2S configuration object, formatted as a
+ * pbjs.setConfig() call matching the Prebid docs style.
  */
 function generateS2SConfig() {
   const enabledBidders = AppState.bidders.filter((b) => b.enabled);
@@ -1410,26 +1348,19 @@ function generateS2SConfig() {
 
   const config = {
     accountId,
-    adapter: "prebidServer",
-    adapterOptions: {},
-    allowUnknownBidderCodes: true,
     bidders: enabledBidders.map((b) => b.id),
-    cookieSet: false,
-    cookiesetUrl: "",
+    adapter: "prebidServer",
     enabled: true,
-    endpoint: {
-      p1Consent: "https://prebid-server.example.com/openrtb2/auction",
-      noP1Consent: "https://prebid-server.example.com/openrtb2/auction",
-    },
-    filterBidderlessCalls: false,
-    maxTimeout: Math.round(AppState.config.timeout * 1.5),
-    syncEndpoint: {
-      p1Consent: "https://prebid-server.example.com/cookie_sync",
-      noP1Consent: "https://prebid-server.example.com/cookie_sync",
-    },
-    syncTimeout: 1000,
-    syncUrlModifier: {},
+    endpoint: "https://prebid-server.example.com/openrtb2/auction",
+    syncEndpoint: "https://prebid-server.example.com/cookie_sync",
     timeout: AppState.config.timeout,
+    extPrebid: {
+      targeting: {
+        pricegranularity: priceGranularityRanges(
+          AppState.config.priceGranularity,
+        ),
+      },
+    },
     ...(AppState.config.currencyConversionEnabled && {
       currency: {
         adServerCurrency: AppState.config.primaryCurrency,
@@ -1451,64 +1382,73 @@ function generateS2SConfig() {
     }),
   };
 
-  return annotateJson(JSON.stringify(config, null, 2), [
+  // Indent each line of the stringified config by 4 spaces so it sits
+  // correctly inside the  s2sConfig: [ ... ]  array wrapper.
+  const innerJson = JSON.stringify(config, null, 2);
+  const indented = innerJson
+    .split("\n")
+    .map((l) => "    " + l)
+    .join("\n");
+
+  const wrapped = `pbjs.setConfig({\n  s2sConfig: [\n${indented}\n  ]\n})`;
+
+  // ws values account for the 4-space wrapper indent + JSON's own indentation.
+  // Top-level config keys: 4 (wrapper) + 2 (JSON level-1) = 6 spaces.
+  // extPrebid children:    4 + 4 = 8 spaces.
+  // targeting children:    4 + 6 = 10 spaces.
+  return annotateJson(wrapped, [
     {
-      ws: "  ",
+      ws: "      ",
       key: "accountId",
       comment: "Publisher account ID registered with Prebid Server",
     },
     {
-      ws: "  ",
-      key: "adapter",
-      comment: "Client-side adapter that handles S2S communication",
-    },
-    {
-      ws: "  ",
-      key: "allowUnknownBidderCodes",
-      comment: "Permits demand from bidders not explicitly listed in bidders[]",
-    },
-    {
-      ws: "  ",
+      ws: "      ",
       key: "bidders",
       comment:
         "Demand partners PBS contacts server-side, bypassing client-side JS",
     },
     {
-      ws: "  ",
+      ws: "      ",
+      key: "adapter",
+      comment: "Client-side Prebid.js module that handles S2S communication",
+    },
+    {
+      ws: "      ",
       key: "endpoint",
-      comment:
-        "PBS auction URL — separate entries for consent/no-consent users",
+      comment: "PBS auction URL — receives the OpenRTB request",
     },
     {
-      ws: "  ",
-      key: "maxTimeout",
-      comment: "Hard upper limit (ms); PBS ignores timeout values above this",
-    },
-    {
-      ws: "  ",
+      ws: "      ",
       key: "syncEndpoint",
-      comment:
-        "Keeps user IDs in sync across demand partners for better match rates",
+      comment: "PBS cookie-sync URL — aligns user IDs across demand partners",
     },
     {
-      ws: "  ",
-      key: "syncTimeout",
-      comment: "Max time (ms) allowed for user-sync calls to complete",
-    },
-    {
-      ws: "  ",
+      ws: "      ",
       key: "timeout",
       comment:
         "Max time (ms) PBS waits for bidder responses before closing the auction",
     },
     {
-      ws: "  ",
+      ws: "      ",
+      key: "extPrebid",
+      comment:
+        "Prebid-specific server extensions — targeting, caching, and feature flags",
+    },
+    {
+      ws: "          ",
+      key: "pricegranularity",
+      comment:
+        "How bid prices are bucketed into ad server key-values (e.g. hb_pb)",
+    },
+    {
+      ws: "      ",
       key: "currency",
       comment:
         "Converts all bids to adServerCurrency for consistent comparison",
     },
     {
-      ws: "  ",
+      ws: "      ",
       key: "floors",
       comment:
         "Server-enforced price floors — bids below threshold are dropped",

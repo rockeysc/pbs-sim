@@ -336,6 +336,15 @@ body {
   background: var(--bg-tertiary);
   padding: var(--spacing-md) var(--spacing-lg);
   border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.reset-btn {
+  flex: none;
+  font-size: 0.8rem;
+  padding: var(--spacing-xs) var(--spacing-sm);
 }
 
 .panel-header h2 {
@@ -638,7 +647,6 @@ select:focus {
 }
 
 .action-btn {
-  flex: 1;
   min-width: 80px;
   display: flex;
   align-items: center;

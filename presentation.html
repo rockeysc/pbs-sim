@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prebid Server Technical Presentation</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: var(--font-family);
+            background: linear-gradient(180deg, #eff6ff 0%, #f8fafc 100%);
+            color: var(--text-primary);
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(12px);
+        }
+
+        .topbar h1 {
+            font-size: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .topbar p {
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            text-decoration: none;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-full);
+            padding: 0.7rem 1rem;
+            font-weight: 700;
+        }
+
+        .deck {
+            max-width: 1520px;
+            margin: 0 auto;
+            padding: 2rem 1.25rem;
+        }
+
+        .deck-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .deck-meta small {
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 800;
+        }
+
+        .deck-meta strong {
+            display: block;
+            margin-top: 0.25rem;
+        }
+
+        .progress {
+            width: min(260px, 40vw);
+            height: 0.45rem;
+            border-radius: var(--radius-full);
+            background: #dbeafe;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            transition: width var(--transition-normal);
+        }
+
+        .slide-frame {
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            overflow: visible;
+        }
+
+        .slide-stage {
+            position: relative;
+            background: transparent;
+        }
+
+        .slide {
+            display: none;
+            padding: clamp(0.75rem, 2vw, 1.5rem) 0 0;
+            grid-template-rows: auto 1fr;
+            gap: 1.5rem;
+        }
+
+        .slide.is-active {
+            display: grid;
+        }
+
+        .slide-head {
+            max-width: 70ch;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.35rem 0.7rem;
+            border-radius: var(--radius-full);
+            background: #dbeafe;
+            color: var(--primary-dark);
+            font-size: 0.74rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .slide-head h2 {
+            margin-top: 1rem;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.05;
+            letter-spacing: -0.04em;
+            max-width: 14ch;
+        }
+
+        .slide-head p {
+            margin-top: 0.8rem;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            max-width: 65ch;
+        }
+
+        .slide-body {
+            display: grid;
+            align-content: start;
+            gap: 1rem;
+        }
+
+        .slide-body>* {
+            min-width: 0;
+        }
+
+        .span-4 {
+            grid-column: span 4;
+        }
+
+        .span-5 {
+            grid-column: span 5;
+        }
+
+        .span-7 {
+            grid-column: span 7;
+        }
+
+        .span-8 {
+            grid-column: span 8;
+        }
+
+        .span-12 {
+            grid-column: 1 / -1;
+        }
+
+        .grid-2,
+        .grid-3 {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .staged-grid>.reveal:nth-child(even) {
+            transform: translate3d(-32px, 6px, 0) scale(0.985);
+        }
+
+        .staged-grid>.reveal:nth-child(even).is-visible {
+            animation-name: floatFadeInLeft;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .card,
+        .code-card,
+        .flow-card {
+            border: 1px solid rgba(203, 213, 225, 0.82);
+            border-radius: 1.2rem;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.94));
+            box-shadow:
+                0 14px 34px rgba(15, 23, 42, 0.08),
+                0 4px 14px rgba(37, 99, 235, 0.06);
+            backdrop-filter: blur(10px);
+        }
+
+        .card,
+        .flow-card {
+            padding: 1rem;
+        }
+
+        .card small,
+        .flow-card small {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .card h3,
+        .flow-card h3 {
+            margin-top: 0.35rem;
+            font-size: 1rem;
+        }
+
+        .card p,
+        .flow-card p {
+            margin-top: 0.45rem;
+            color: var(--text-secondary);
+        }
+
+        .card ul {
+            margin: 0.7rem 0 0;
+            padding-left: 1rem;
+            color: var(--text-secondary);
+            display: grid;
+            gap: 0.4rem;
+        }
+
+        .card li::marker {
+            color: var(--primary-color);
+        }
+
+        .card code {
+            display: inline-block;
+            padding: 0.16rem 0.42rem;
+            border-radius: 0.45rem;
+            background: rgba(219, 234, 254, 0.7);
+            color: var(--primary-dark);
+            font-family: var(--font-mono);
+            font-size: 0.92em;
+            font-weight: 700;
+        }
+
+        .media-card {
+            padding: 0.85rem;
+            overflow: hidden;
+        }
+
+        .media-card--large {
+            padding: 1rem;
+        }
+
+        .media-card video {
+            width: 100%;
+            display: block;
+            margin-top: 0.7rem;
+            border-radius: 0.95rem;
+            border: 1px solid rgba(203, 213, 225, 0.82);
+            background: #0f172a;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
+        }
+
+        .media-card--large video {
+            margin-top: 0.85rem;
+            max-height: 68vh;
+            min-height: 360px;
+            object-fit: contain;
+        }
+
+        .hero-band {
+            padding: 1rem 1.15rem;
+            border-radius: 1.25rem;
+            background: linear-gradient(145deg, #0f172a, #1d4ed8);
+            color: #dbeafe;
+            box-shadow:
+                0 20px 42px rgba(15, 23, 42, 0.2),
+                0 8px 18px rgba(29, 78, 216, 0.18);
+        }
+
+        .hero-band strong {
+            display: block;
+            color: #fff;
+            margin-bottom: 0.35rem;
+        }
+
+        .flow-row {
+            display: grid;
+            grid-template-columns: 1.15fr auto 1.15fr auto 1.15fr auto 1.15fr auto 1.15fr;
+            gap: 0.8rem;
+            align-items: center;
+        }
+
+        .flow-step {
+            display: contents;
+        }
+
+        .flow-step[hidden] {
+            display: none !important;
+        }
+
+        .flow-node {
+            padding: 0.95rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(203, 213, 225, 0.85);
+            background: rgba(255, 255, 255, 0.96);
+            text-align: center;
+            box-shadow:
+                0 10px 24px rgba(15, 23, 42, 0.07),
+                0 2px 8px rgba(37, 99, 235, 0.05);
+        }
+
+        .flow-node strong {
+            display: block;
+            font-size: 0.95rem;
+        }
+
+        .flow-node span {
+            color: var(--text-secondary);
+            font-size: 0.84rem;
+        }
+
+        .flow-step .flow-node,
+        .flow-step .arrow {
+            opacity: 0;
+            transform: translate3d(34px, 8px, 0) scale(0.985);
+            will-change: transform, opacity;
+        }
+
+        .flow-step:nth-child(even) .flow-node,
+        .flow-step:nth-child(even) .arrow {
+            transform: translate3d(-34px, 8px, 0) scale(0.985);
+        }
+
+        .flow-step.is-visible .flow-node,
+        .flow-step.is-visible .arrow {
+            opacity: 1;
+            transform: translate3d(0, 0, 0) scale(1);
+            animation: flowStepInRight 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        .flow-step:nth-child(even).is-visible .flow-node,
+        .flow-step:nth-child(even).is-visible .arrow {
+            animation-name: flowStepInLeft;
+        }
+
+        .flow-step.is-visible .arrow {
+            animation-duration: 420ms;
+        }
+
+        .arrow {
+            text-align: center;
+            color: var(--primary-color);
+            font-weight: 800;
+        }
+
+        .code-card {
+            overflow: hidden;
+            background: #0f172a;
+            border-color: #1e293b;
+            box-shadow:
+                0 20px 42px rgba(15, 23, 42, 0.28),
+                0 8px 20px rgba(15, 23, 42, 0.18);
+        }
+
+        .code-head {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+            color: #93c5fd;
+            font-size: 0.78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .code-card pre {
+            margin: 0;
+            padding: 1rem;
+            overflow-x: auto;
+            color: #e2e8f0;
+            font-family: var(--font-mono);
+            font-size: 0.84rem;
+            line-height: 1.55;
+        }
+
+        .reveal[hidden] {
+            display: none !important;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translate3d(32px, 6px, 0) scale(0.985);
+            will-change: transform, opacity;
+        }
+
+        .slide-body>.reveal:nth-child(even) {
+            transform: translate3d(-32px, 6px, 0) scale(0.985);
+        }
+
+        .reveal.is-visible {
+            opacity: 1;
+            transform: translate3d(0, 0, 0) scale(1);
+            animation: floatFadeInRight 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        .slide-body>.reveal.is-visible {
+            filter: drop-shadow(0 16px 30px rgba(15, 23, 42, 0.08));
+        }
+
+        .slide-body>.reveal:nth-child(even).is-visible {
+            animation-name: floatFadeInLeft;
+        }
+
+        @keyframes floatFadeInRight {
+            0% {
+                opacity: 0;
+                transform: translate3d(42px, 10px, 0) scale(0.98);
+                filter: blur(3px);
+            }
+
+            60% {
+                opacity: 1;
+                transform: translate3d(-4px, -2px, 0) scale(1);
+                filter: blur(0);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translate3d(0, 0, 0) scale(1);
+                filter: blur(0);
+            }
+        }
+
+        @keyframes floatFadeInLeft {
+            0% {
+                opacity: 0;
+                transform: translate3d(-42px, 10px, 0) scale(0.98);
+                filter: blur(3px);
+            }
+
+            60% {
+                opacity: 1;
+                transform: translate3d(4px, -2px, 0) scale(1);
+                filter: blur(0);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translate3d(0, 0, 0) scale(1);
+                filter: blur(0);
+            }
+        }
+
+        @keyframes flowStepInRight {
+            0% {
+                opacity: 0;
+                transform: translate3d(46px, 10px, 0) scale(0.98);
+                filter: blur(3px);
+            }
+
+            60% {
+                opacity: 1;
+                transform: translate3d(-4px, -2px, 0) scale(1);
+                filter: blur(0);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translate3d(0, 0, 0) scale(1);
+                filter: blur(0);
+            }
+        }
+
+        @keyframes flowStepInLeft {
+            0% {
+                opacity: 0;
+                transform: translate3d(-46px, 10px, 0) scale(0.98);
+                filter: blur(3px);
+            }
+
+            60% {
+                opacity: 1;
+                transform: translate3d(4px, -2px, 0) scale(1);
+                filter: blur(0);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translate3d(0, 0, 0) scale(1);
+                filter: blur(0);
+            }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 1rem 1.25rem;
+            border: 1px solid var(--border-color);
+            border-radius: 1.25rem;
+            background: rgba(248, 250, 252, 0.9);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .controls-copy {
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+        }
+
+        .controls-copy strong {
+            display: block;
+            color: var(--text-primary);
+        }
+
+        .controls-group {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-radius: var(--radius-full);
+            padding: 0.8rem 1rem;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            border-color: var(--primary-dark);
+            color: #fff;
+        }
+
+        .btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .dots {
+            display: flex;
+            gap: 0.45rem;
+            position: fixed;
+            left: 50%;
+            bottom: max(1rem, env(safe-area-inset-bottom));
+            transform: translateX(-50%);
+            padding: 0.6rem 0.8rem;
+            border: 1px solid rgba(203, 213, 225, 0.88);
+            border-radius: var(--radius-full);
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+            pointer-events: auto;
+            z-index: 40;
+        }
+
+        .dot {
+            width: 0.65rem;
+            height: 0.65rem;
+            padding: 0;
+            border: none;
+            border-radius: 50%;
+            background: #cbd5e1;
+            cursor: pointer;
+            transition: transform 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+        }
+
+        .dot:hover,
+        .dot:focus-visible {
+            transform: scale(1.18);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+            outline: none;
+        }
+
+        .dot.is-active {
+            background: var(--primary-color);
+        }
+
+        .dot.is-complete {
+            background: #93c5fd;
+        }
+
+        @media (min-width: 1080px) {
+
+            .slide.is-active {
+                grid-template-columns: minmax(320px, 0.78fr) minmax(0, 1.22fr);
+                align-items: start;
+                gap: 1.75rem;
+            }
+
+            .slide-head {
+                max-width: none;
+                padding-right: 1rem;
+            }
+
+            .slide-head h2,
+            .slide-head p {
+                max-width: none;
+            }
+
+            .slide-body {
+                grid-template-columns: repeat(12, minmax(0, 1fr));
+                gap: 1.15rem;
+            }
+
+            .slide--demo.is-active {
+                grid-template-columns: minmax(240px, 0.52fr) minmax(0, 1.48fr);
+            }
+        }
+
+        @media (max-width: 1079px) {
+
+            .span-4,
+            .span-5,
+            .span-7,
+            .span-8,
+            .span-12 {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 860px) {
+
+            .grid-2,
+            .grid-3,
+            .flow-row {
+                grid-template-columns: 1fr;
+            }
+
+            .deck-meta,
+            .controls,
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .dots {
+                bottom: max(0.75rem, env(safe-area-inset-bottom));
+                padding: 0.5rem 0.7rem;
+            }
+
+            .media-card--large video {
+                min-height: 0;
+                max-height: none;
+            }
+
+            .progress {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <div>
+            <h1>Prebid Server Technical Presentation</h1>
+            <p>Minimal slide deck with click-to-reveal steps.</p>
+        </div>
+        <a class="back-link" href="landing.html">← Learning Hub</a>
+    </header>
+
+    <main class="deck">
+        <div class="deck-meta">
+            <div>
+                <small id="slideLabel">Slide 1</small>
+                <strong id="slideTitle">What Prebid Server is</strong>
+            </div>
+            <div class="progress" aria-hidden="true">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="controls-copy">
+                <strong id="controlsHeadline">Click reveal to step through this slide.</strong>
+                <div id="controlsSubcopy">Once all blocks on the slide are visible, the same button advances to the
+                    next slide.</div>
+            </div>
+            <div class="controls-group">
+                <button class="btn" id="prevBtn" type="button" onclick="prevStep()">Previous</button>
+                <button class="btn btn-primary" id="nextBtn" type="button" onclick="nextStep()">Reveal</button>
+            </div>
+        </div>
+
+        <section class="slide-frame">
+            <div class="slide-stage">
+                <section class="slide is-active" data-title="What Prebid Server is">
+                    <div class="slide-head">
+                        <span class="eyebrow">Foundation</span>
+                        <h2>Prebid Server is an open-source solution for server-to-server header bidding. </h2>
+                        <p>Prebid.js orchestrates the auction in the browser, while Prebid Server handles server-side
+                            bid requests—enriching the request, enforcing policies, fanning out to bidders, and
+                            returning a normalized response.</p>
+                    </div>
+                    <div class="slide-body">
+                        <div class="hero-band reveal span-5" data-reveal>
+                            <strong>Core idea</strong>
+                            Server-side bidding does not remove Prebid.js. It changes where bidder execution happens.
+                        </div>
+                        <div class="grid-3 reveal span-7" data-reveal>
+                            <article class="card"><small>Input</small>
+                                <h3>Validate + enhance</h3>
+                                <p>PBS parses the OpenRTB request, resolves stored requests, and applies account and
+                                    bidder-level defaults</p>
+                            </article>
+                            <article class="card"><small>Execution</small>
+                                <h3>Run server adapters</h3>
+                                <p>PBS calls multiple bidder adapters in parallel without loading them in the browser.
+                                </p>
+                            </article>
+                            <article class="card"><small>Output</small>
+                                <h3>Normalize results</h3>
+                                <p>PBS standardizes bid responses, applies currency conversion and caching, and returns
+                                    them to Prebid.js for auction logic and targeting.</p>
+                            </article>
+                        </div>
+                        <div class="card reveal span-12" data-reveal><small>Important boundary</small>
+                            <p>The browser (via Prebid.js) owns the ad server targeting handoff and final rendering.
+                                After PBS returns bids, Prebid.js sets targeting for the ad server, and creatives are
+                                rendered in the browser, typically via Prebid Universal Creative.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="slide" data-title="Prebid.js vs Prebid Server">
+                    <div class="slide-head">
+                        <span class="eyebrow">Section 1</span>
+                        <h2>Prebid.js and Prebid Server introduce a separation of responsibilities between browser
+                            orchestration and server-side bidder execution</h2>
+                        <p>The architecture shifts from client-side bidder fan-out to a hybrid model, where Prebid.js
+                            continues to coordinate the page and auction flow, while Prebid Server executes selected
+                            bidders through an OpenRTB-based workflow.</p>
+                    </div>
+                    <div class="slide-body">
+                        <div class="grid-2 reveal span-8" data-reveal>
+                            <article class="card"><small>Prebid.js</small>
+                                <h3>Client-side auction</h3>
+                                <ul>
+                                    <li>Client-side auction</li>
+                                    <li>Bidder adapters run in browser JavaScript.</li>
+                                    <li>Each bidder request originates from the page.</li>
+                                    <li>Browser cost grows as demand partners increase.</li>
+                                </ul>
+                            </article>
+                            <article class="card"><small>Prebid Server</small>
+                                <h3>Server-side auction</h3>
+                                <ul>
+                                    <li>Server-side bidder execution</li>
+                                    <li>`s2sConfig` routes selected bidders to PBS.</li>
+                                    <li>The browser (via Prebid.js) sends a single request to PBS.</li>
+                                    <li>PBS performs bidder fan-out and returns normalized bid responses to Prebid.js
+                                    </li>
+                                </ul>
+                            </article>
+                        </div>
+                        <div class="card reveal span-4" data-reveal><small>What stays the same</small>
+                            <p>Both approaches converge on the same ad server path: Prebid targeting is set on the page,
+                                the ad server selects a line item, and Prebid Universal Creative invokes
+                                `pbjs.renderAd()` when a Prebid line item wins.</p>
+                        </div>
+                        <div class="grid-3 reveal span-12" data-reveal>
+                            <article class="card"><small>Latency</small>
+                                <p>PBS cuts browser network and CPU overhead by handling bidder calls server-side.</p>
+                            </article>
+                            <article class="card"><small>Protocol</small>
+                                <p>PBS uses OpenRTB with ext.prebid for Prebid-specific metadata.</p>
+                            </article>
+                            <article class="card"><small>Operations</small>
+                                <p>Client- and server-side demand can run together; Prebid.js merges bids and runs the
+                                    auction.</p>
+                            </article>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="slide" data-title="Request lifecycle">
+                    <div class="slide-head">
+                        <span class="eyebrow">Request Flow</span>
+                        <h2>Browser (Prebid.js) → Prebid Server → SSPs → Ad Server → Prebid Universal Creative → render.
+                        </h2>
+                        <p>This lifecycle highlights how Prebid.js orchestrates the page while PBS executes server-side
+                            bidders and returns normalized bids for the final auction and rendering in the browser.</p>
+                    </div>
+                    <div class="slide-body">
+                        <div class="flow-card span-12" style="width: 1000px;">
+                            <small>Flow chart</small>
+                            <div class="flow-row">
+                                <div class="flow-step reveal" data-reveal>
+                                    <div class="flow-node"><strong>Browser</strong><span>Prebid.js routes bidders via
+                                            s2sConfig</span></div>
+                                </div>
+                                <div class="flow-step reveal" data-reveal>
+                                    <div class="arrow">→</div>
+                                    <div class="flow-node"><strong>Prebid Server</strong><span>PBS executes bidder calls
+                                            and returns bids.</span></div>
+                                </div>
+                                <div class="flow-step reveal" data-reveal>
+                                    <div class="arrow">→</div>
+                                    <div class="flow-node"><strong>SSPs/Bidders</strong><span>Prebid.js sets targeting
+                                            for the ad server.</span>
+                                    </div>
+                                </div>
+                                <div class="flow-step reveal" data-reveal>
+                                    <div class="arrow">→</div>
+                                    <div class="flow-node"><strong>Ad Server</strong><span>The ad server returns
+                                            Prebid Universal Creative</span>
+                                    </div>
+                                </div>
+                                <div class="flow-step reveal" data-reveal>
+                                    <div class="arrow">→</div>
+                                    <div class="flow-node"><strong>PUC</strong><span>pbjs.renderAd() renders the winning
+                                            ad.</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid-3 span-8 staged-grid">
+                            <article class="card reveal" data-reveal><small>1–2</small>
+                                <h3>Initiation</h3>
+                                <p>Prebid.js sends an OpenRTB request to PBS via `s2sConfig`.<br></br><br></br></p>
+                            </article>
+                            <article class="card reveal" data-reveal><small>3–4</small>
+                                <h3>Auction + targeting</h3>
+                                <p>PBS executes server-side bidders; Prebid.js converts responses into ad server
+                                    targeting.</p>
+                            </article>
+                            <article class="card reveal" data-reveal><small>5–6</small>
+                                <h3>Delivery + render</h3>
+                                <p>Ad server returns Prebid Universal Creative, which calls `pbjs.renderAd()` for
+                                    display.</p>
+                            </article>
+                        </div>
+
+                        <div class="card reveal span-4" data-reveal>
+                            <small>Technical note</small>
+                            <p>The winning creative or cache reference returns to the browser, but rendering happens
+                                in-browser after the ad server response.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="slide" data-title="s2sConfig and OpenRTB">
+                    <div class="slide-head">
+                        <span class="eyebrow">Section 2</span>
+                        <h2>s2sConfig is the client-side configuration that routes selected bidders to Prebid Server.
+                        </h2>
+                        <p>It defines which bidders run in PBS, where requests are sent, and what Prebid-specific
+                            controls are included in the OpenRTB payload.</p>
+                    </div>
+                    <div class="slide-body">
+                        <div class="code-card reveal span-8" data-reveal>
+                            <div class="code-head">Illustrative `s2sConfig`</div>
+                            <pre><code>pbjs.setConfig({
+  s2sConfig: [{
+    accountId: 'freestar-account',
+    bidders: ['appnexus', 'rubicon'], // server-side bidders
+    enabled: true,
+    endpoint: 'https://pbs.example.com/openrtb2/auction',
+    syncEndpoint: 'https://pbs.example.com/cookie_sync',
+    timeout: 650
+  }]
+});</code></pre>
+                        </div>
+                        <div class="card reveal span-4" data-reveal><small>Sequence</small>
+                            <p>Client trigger → Prebid.js sends OpenRTB request via PBS adapter → PBS validates request
+                                and executes server-side bidders → normalized bids return to Prebid.js → page sets ad
+                                server targeting.</p>
+                        </div>
+                        <div class="grid-3 reveal span-12" data-reveal>
+                            <article class="card"><small>Routing</small>
+                                <h3>`bidders`</h3>
+                                <p>Defines which bidders run server-side via Prebid Server.</p>
+                            </article>
+
+                            <article class="card"><small>Transport</small>
+                                <h3>`endpoint`</h3>
+                                <p>PBS OpenRTB auction endpoint (e.g. `/openrtb2/auction`).</p>
+                            </article>
+
+                            <article class="card"><small>Controls</small>
+                                <h3>Config options</h3>
+                                <p>Optional settings passed through s2sConfig to influence PBS behavior.</p>
+                            </article>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="slide" data-title="Freestar hybrid implementation">
+                    <div class="slide-head">
+                        <span class="eyebrow">Section 3</span>
+                        <h2>Freestar uses a hybrid Prebid model where configuration is centralized and bidder execution
+                            can occur client-side or server-side.</h2>
+                        <p>Prebid Server acts as a server-side extension of Prebid.js, using the same OpenRTB-based
+                            auction framework while allowing selected demand partners to execute off-page.</p>
+                    </div>
+                    <div class="slide-body">
+                        <div class="grid-2 reveal span-8" data-reveal>
+                            <article class="card"><small>Configuration</small>
+                                <h3>Centralized in FAD</h3>
+                                <ul>
+                                    <li>SSPs are configured in FAD</li>
+                                    <li>Client or Server-Side selections are configured within FAD</li>
+                                </ul>
+                            </article>
+                            <article class="card"><small>Hybrid routing</small>
+                                <h3>Client-side or server-side</h3>
+                                <ul>
+                                    <li>Some SSPs stay in Prebid.js.</li>
+                                    <li>Some SSPs are routed into PBS through `s2sConfig`.</li>
+                                    <li>Server-side bids are returned to Prebid.js for unified auction handling.</li>
+                                </ul>
+                            </article>
+                        </div>
+                        <div class="hero-band reveal span-4" data-reveal><strong>Final framing</strong>Prebid Server is
+                            not a separate stack—it is an extension of the Prebid ecosystem that shifts selected bidder
+                            execution to the server while keeping Prebid.js as the primary auction orchestrator.</div>
+                        <div class="grid-3 reveal span-12" data-reveal>
+                            <article class="card"><small>Benefit</small>
+                                <h3>Reduced browser overhead</h3>
+                                <p>Fewer client-side requests and lighter front-end execution.</p>
+                            </article>
+                            <article class="card"><small>Benefit</small>
+                                <h3>Scalable demand</h3>
+                                <p>More bidders can participate without significantly increasing page weight.</p>
+                            </article>
+                            <article class="card"><small>Takeaway</small>
+                                <h3>Same auction, different execution paths</h3>
+                                <p>Freestar maintains the Prebid model while optimizing where bidder logic runs.
+                                </p>
+                            </article>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="slide slide--demo" data-title="Inspecting Freestar s2sConfig">
+                    <div class="slide-head">
+                        <span class="eyebrow">Section 3 Demo</span>
+                        <h2>Use the browser console to inspect Freestar's live server-side routing config.</h2>
+                        <p>This slide shows how to access the active Prebid configuration at runtime and isolate the
+                            `s2sConfig` used for server-side bidder routing.</p>
+                    </div>
+                    <div class="slide-body">
+                        <article class="card reveal span-4" data-reveal>
+                            <small>Dev console</small>
+                            <h3>Runtime access points</h3>
+                            <p>On a Freestar-managed page, the Prebid wrapper exposes the current runtime config for
+                                direct inspection in the console.</p>
+                            <ul>
+                                <li>Use <code>fsprebid.getConfig()</code> to inspect the full live Prebid config.</li>
+                                <li>Use <code>fsprebid.getConfig().s2sConfig</code> to inspect only the active
+                                    server-side routing configuration.</li>
+                            </ul>
+                        </article>
+                        <article class="card media-card media-card--large reveal span-8" data-reveal>
+                            <small>Demo</small>
+                            <h3>Runtime S2S inspection</h3>
+                            <p>The clip below demonstrates checking Freestar's `s2sConfig` directly in the developer
+                                console.</p>
+                            <video src="s2s.mov" autoplay muted loop playsinline controls preload="metadata"></video>
+                        </article>
+                    </div>
+                </section>
+            </div>
+
+        </section>
+
+    </main>
+
+    <div class="dots" id="dots" aria-label="Jump to slide"></div>
+
+    <script>
+        const slides = [...document.querySelectorAll('.slide')];
+        const nextBtn = document.getElementById('nextBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const slideLabel = document.getElementById('slideLabel');
+        const slideTitle = document.getElementById('slideTitle');
+        const progressBar = document.getElementById('progressBar');
+        const controlsHeadline = document.getElementById('controlsHeadline');
+        const controlsSubcopy = document.getElementById('controlsSubcopy');
+        const dots = document.getElementById('dots');
+
+        const revealTotals = slides.map((slide) => slide.querySelectorAll('[data-reveal]').length);
+        const revealState = slides.map(() => 0);
+        let currentSlide = 0;
+
+        slides.forEach((slide, index) => {
+            const dot = document.createElement('button');
+            dot.className = 'dot';
+            dot.type = 'button';
+            dot.dataset.index = index;
+            dot.title = slide.dataset.title;
+            dot.setAttribute('aria-label', `Jump to slide ${index + 1}: ${slide.dataset.title}`);
+            dot.addEventListener('click', () => {
+                currentSlide = index;
+                render();
+            });
+            dots.appendChild(dot);
+        });
+
+        function setVisibleFragments(index) {
+            const fragments = [...slides[index].querySelectorAll('[data-reveal]')];
+            fragments.forEach((fragment, fragmentIndex) => {
+                const isVisible = fragmentIndex < revealState[index];
+                fragment.hidden = !isVisible;
+                fragment.classList.toggle('is-visible', isVisible);
+            });
+        }
+
+        function render() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('is-active', index === currentSlide);
+                setVisibleFragments(index);
+            });
+
+            [...dots.children].forEach((dot, index) => {
+                dot.classList.toggle('is-active', index === currentSlide);
+                dot.classList.toggle('is-complete', index < currentSlide || revealState[index] === revealTotals[index]);
+                dot.setAttribute('aria-current', index === currentSlide ? 'true' : 'false');
+            });
+
+            const slideNumber = currentSlide + 1;
+            const totalSlides = slides.length;
+            const currentReveals = revealState[currentSlide];
+            const totalReveals = revealTotals[currentSlide];
+            const fullyRevealed = currentReveals === totalReveals;
+
+            slideLabel.textContent = `Slide ${slideNumber} of ${totalSlides}`;
+            slideTitle.textContent = slides[currentSlide].dataset.title;
+            progressBar.style.width = `${((slideNumber - 1 + (totalReveals ? currentReveals / totalReveals : 1)) / totalSlides) * 100}%`;
+            nextBtn.textContent = fullyRevealed ? (slideNumber === totalSlides ? 'Finished' : 'Next Slide') : 'Reveal';
+            nextBtn.disabled = fullyRevealed && slideNumber === totalSlides;
+            prevBtn.disabled = currentSlide === 0 && revealState[currentSlide] === 0;
+            controlsHeadline.textContent = fullyRevealed ? 'This slide is complete.' : 'Click reveal to step through this slide.';
+            controlsSubcopy.textContent = fullyRevealed ? 'Use Next Slide to continue, or Previous to revisit earlier content.' : `${currentReveals}/${totalReveals} content blocks visible on this slide.`;
+        }
+
+        function nextStep() {
+            if (revealState[currentSlide] < revealTotals[currentSlide]) {
+                revealState[currentSlide] += 1;
+            } else if (currentSlide < slides.length - 1) {
+                currentSlide += 1;
+            }
+            render();
+        }
+
+        function prevStep() {
+            if (revealState[currentSlide] > 0) {
+                revealState[currentSlide] -= 1;
+            } else if (currentSlide > 0) {
+                currentSlide -= 1;
+                revealState[currentSlide] = revealTotals[currentSlide];
+            }
+            render();
+        }
+
+        window.nextStep = nextStep;
+        window.prevStep = prevStep;
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowRight' || event.key === ' ') {
+                event.preventDefault();
+                nextStep();
+            }
+            if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                prevStep();
+            }
+        });
+
+        render();
+    </script>
+</body>
+
+</html>
