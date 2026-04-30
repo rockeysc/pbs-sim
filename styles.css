@@ -187,6 +187,26 @@ body {
   .workflow-panel {
     height: auto;
     max-height: none;
+    overflow: visible;
+  }
+
+  .workflow-visualization {
+    max-height: calc(100vh - 220px);
+  }
+
+  .phase-indicator {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
+  }
+
+  .code-blocks-row.visible {
+    flex-direction: column;
+  }
+
+  .bidder-flow {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 
@@ -867,12 +887,10 @@ select:focus {
 /* Workflow Visualization */
 .workflow-visualization {
   flex: 1;
-  overflow-y: auto;
+  min-height: 0;
+  overflow-y: scroll;
   overflow-x: hidden;
   padding: var(--spacing-md);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
   position: relative;
 }
 

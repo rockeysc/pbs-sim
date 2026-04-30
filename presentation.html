@@ -155,6 +155,7 @@
 
         .slide-body>* {
             min-width: 0;
+            align-self: start;
         }
 
         .span-4 {
@@ -642,11 +643,19 @@
             }
         }
 
+        .flow-scroll-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .flow-scroll-wrap .flow-row {
+            min-width: 700px;
+        }
+
         @media (max-width: 860px) {
 
             .grid-2,
-            .grid-3,
-            .flow-row {
+            .grid-3 {
                 grid-template-columns: 1fr;
             }
 
@@ -805,8 +814,9 @@
                             bidders and returns normalized bids for the final auction and rendering in the browser.</p>
                     </div>
                     <div class="slide-body">
-                        <div class="flow-card span-12" style="width: 1000px;">
+                        <div class="flow-card span-12">
                             <small>Flow chart</small>
+                            <div class="flow-scroll-wrap">
                             <div class="flow-row">
                                 <div class="flow-step reveal" data-reveal>
                                     <div class="flow-node"><strong>Browser</strong><span>Prebid.js routes bidders via
@@ -833,6 +843,7 @@
                                     <div class="flow-node"><strong>PUC</strong><span>pbjs.renderAd() renders the winning
                                             ad.</span></div>
                                 </div>
+                            </div>
                             </div>
                         </div>
                         <div class="grid-3 span-8 staged-grid">
