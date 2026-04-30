@@ -316,8 +316,8 @@
             display: contents;
         }
 
-        .flow-step[hidden] {
-            display: none !important;
+        .flow-row .flow-step[hidden] {
+            display: contents !important;
         }
 
         .flow-node {
@@ -644,8 +644,14 @@
         }
 
         .flow-scroll-wrap {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
+            overflow: hidden;
+        }
+
+        @media (max-width: 860px) {
+            .flow-scroll-wrap {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
         }
 
         .flow-scroll-wrap .flow-row {
@@ -726,11 +732,11 @@
                             returning a normalized response.</p>
                     </div>
                     <div class="slide-body">
-                        <div class="hero-band reveal span-5" data-reveal>
+                        <div class="hero-band reveal span-12" data-reveal>
                             <strong>Core idea</strong>
                             Server-side bidding does not remove Prebid.js. It changes where bidder execution happens.
                         </div>
-                        <div class="grid-3 reveal span-7" data-reveal>
+                        <div class="grid-3 reveal span-12" data-reveal>
                             <article class="card"><small>Input</small>
                                 <h3>Validate + enhance</h3>
                                 <p>PBS parses the OpenRTB request, resolves stored requests, and applies account and
@@ -751,6 +757,10 @@
                             <p>The browser (via Prebid.js) owns the ad server targeting handoff and final rendering.
                                 After PBS returns bids, Prebid.js sets targeting for the ad server, and creatives are
                                 rendered in the browser, typically via Prebid Universal Creative.</p>
+                        </div>
+                        <div class="card reveal span-12" data-reveal><small>Prebid Universal Creative</small>
+                            <p>The <strong>Prebid Universal Creative (PUC)</strong> is a JS snippet trafficked on every Prebid line item in the ad server. When a Prebid line item wins, the PUC reads Prebid.js targeting keys, retrieves the cached bid, and renders it—one creative that handles all bidders and all formats.</p>
+                            <p style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid rgba(203,213,225,0.5);color:var(--text-muted);font-size:0.88rem;"><strong style="color:var(--text-secondary);">In plain English:</strong> The ad server only knows one trick — run this one little script. That script is the PUC, and its job is to look up whichever ad won the auction and actually put it on the page. It's the universal adapter between the ad server and every possible ad format.</p>
                         </div>
                     </div>
                 </section>
