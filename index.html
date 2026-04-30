@@ -252,7 +252,7 @@
                         <option value="medium" selected>Medium ($0.10 increments)</option>
                         <option value="high">High ($0.01 increments)</option>
                         <option value="auto">Auto (variable)</option>
-                        <option value="dense">Dense ($0.01 up to $3, then $0.10)</option>
+                        <option value="dense">Dense ($0.01 up to $3, $0.05 up to $8, then $0.50)</option>
                     </select>
                 </div>
             </div>
@@ -511,18 +511,18 @@
                     </div>
                     <div class="stage-content">
                         <div class="post-auction-steps">
-                            <div class="processing-step" id="floorCheck">
-                                <div class="step-icon"><span class="material-icons-round">price_check</span></div>
-                                <div class="step-info">
-                                    <div class="step-name">Floor Enforcement</div>
-                                    <div class="step-detail" id="floorCheckDetail">-</div>
-                                </div>
-                            </div>
                             <div class="processing-step" id="currencyConvert">
                                 <div class="step-icon"><span class="material-icons-round">currency_exchange</span></div>
                                 <div class="step-info">
                                     <div class="step-name">Currency Conversion</div>
                                     <div class="step-detail" id="currencyConvertDetail">-</div>
+                                </div>
+                            </div>
+                            <div class="processing-step" id="floorCheck">
+                                <div class="step-icon"><span class="material-icons-round">price_check</span></div>
+                                <div class="step-info">
+                                    <div class="step-name">Floor Enforcement</div>
+                                    <div class="step-detail" id="floorCheckDetail">-</div>
                                 </div>
                             </div>
                             <div class="processing-step" id="winnerSelect">

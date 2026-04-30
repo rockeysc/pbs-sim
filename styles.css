@@ -11,25 +11,25 @@
 }
 
 :root {
-  /* Color Palette */
-  --primary-color: #2563eb;
-  --primary-dark: #1d4ed8;
-  --primary-light: #3b82f6;
-  --secondary-color: #64748b;
-  --success-color: #22c55e;
-  --success-light: #86efac;
+  /* Color Palette — Freestar Brand */
+  --primary-color: #00c389;
+  --primary-dark: #208268;
+  --primary-light: #4fbc86;
+  --secondary-color: #913e96;
+  --success-color: #00c389;
+  --success-light: #4fbc86;
   --warning-color: #f59e0b;
   --warning-light: #fcd34d;
   --danger-color: #ef4444;
   --danger-light: #fca5a5;
-  --info-color: #06b6d4;
-  --info-light: #67e8f9;
+  --info-color: #793eb0;
+  --info-light: #844d9e;
 
   /* Neutral Colors */
   --bg-primary: #f8fafc;
   --bg-secondary: #ffffff;
   --bg-tertiary: #f1f5f9;
-  --text-primary: #1e293b;
+  --text-primary: #2d2926;
   --text-secondary: #475569;
   --text-muted: #94a3b8;
   --border-color: #e2e8f0;
@@ -799,7 +799,7 @@ select:focus {
 .phase.active .phase-number {
   background: var(--primary-color);
   color: white;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 0 0 4px rgba(0, 195, 137, 0.2);
 }
 
 .phase.completed .phase-number {
@@ -840,7 +840,7 @@ select:focus {
 
 .phase.completed:hover .phase-number {
   transform: scale(1.12);
-  box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.25);
+  box-shadow: 0 0 0 5px rgba(0, 195, 137, 0.25);
 }
 
 /* Highlight the phase currently being viewed in the indicator */
@@ -1590,7 +1590,7 @@ select:focus {
 
 .status-badge.won {
   background: var(--success-light);
-  color: #166534;
+  color: #167059;
 }
 
 .status-badge.lost {
@@ -1610,7 +1610,7 @@ select:focus {
 
 .status-badge.pending {
   background: var(--info-light);
-  color: #0e7490;
+  color: #ffffff;
 }
 
 /* Phase 4: Post-Auction Stage */
@@ -1819,12 +1819,12 @@ select:focus {
 
 .feedback-item.info {
   background: var(--info-light);
-  color: #0e7490;
+  color: #ffffff;
 }
 
 .feedback-item.success {
   background: var(--success-light);
-  color: #166534;
+  color: #167059;
 }
 
 .feedback-item.warning {
@@ -2167,10 +2167,10 @@ select:focus {
   align-items: center;
   justify-content: space-between;
   padding: 6px var(--spacing-md);
-  background: #eff6ff;
-  border-bottom: 1px solid #bfdbfe;
+  background: #e6f9f4;
+  border-bottom: 1px solid #a8dfd0;
   font-size: 0.8125rem;
-  color: #1e40af;
+  color: #208268;
   font-weight: 500;
   flex-shrink: 0;
 }
@@ -2314,8 +2314,8 @@ select:focus {
 }
 
 .summary-event-item.success {
-  background: #f0fdf4;
-  color: #166534;
+  background: #e6f9f4;
+  color: #167059;
 }
 .summary-event-item.success .event-dot {
   background: var(--success-color);
@@ -2340,11 +2340,11 @@ select:focus {
   align-items: flex-start;
   gap: var(--spacing-md);
   padding: var(--spacing-md);
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
+  background: #e6f9f4;
+  border: 1px solid #a8dfd0;
   border-radius: var(--radius-md);
   font-size: 0.8125rem;
-  color: #1e40af;
+  color: #208268;
   line-height: 1.55;
 }
 
@@ -2352,7 +2352,7 @@ select:focus {
   font-size: 1.25rem;
   line-height: 1;
   flex-shrink: 0;
-  color: #2563eb;
+  color: #00c389;
 }
 
 /* ============================================
@@ -2400,7 +2400,7 @@ select:focus {
 }
 
 .phase-proceed-btn.complete:hover {
-  background: #16a34a;
+  background: #167059;
   transform: none;
 }
 

@@ -11,7 +11,7 @@
             margin: 0;
             min-height: 100vh;
             font-family: var(--font-family);
-            background: linear-gradient(180deg, #eff6ff 0%, #f8fafc 100%);
+            background: linear-gradient(180deg, #e6f9f4 0%, #f8fafc 100%);
             color: var(--text-primary);
         }
 
@@ -79,7 +79,7 @@
             width: min(260px, 40vw);
             height: 0.45rem;
             border-radius: var(--radius-full);
-            background: #dbeafe;
+            background: #b3ead8;
             overflow: hidden;
         }
 
@@ -124,7 +124,7 @@
             gap: 0.45rem;
             padding: 0.35rem 0.7rem;
             border-radius: var(--radius-full);
-            background: #dbeafe;
+            background: #e6f9f4;
             color: var(--primary-dark);
             font-size: 0.74rem;
             font-weight: 800;
@@ -207,7 +207,7 @@
             background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.94));
             box-shadow:
                 0 14px 34px rgba(15, 23, 42, 0.08),
-                0 4px 14px rgba(37, 99, 235, 0.06);
+                0 4px 14px rgba(0, 195, 137, 0.06);
             backdrop-filter: blur(10px);
         }
 
@@ -254,7 +254,7 @@
             display: inline-block;
             padding: 0.16rem 0.42rem;
             border-radius: 0.45rem;
-            background: rgba(219, 234, 254, 0.7);
+            background: rgba(230, 249, 244, 0.85);
             color: var(--primary-dark);
             font-family: var(--font-mono);
             font-size: 0.92em;
@@ -290,11 +290,11 @@
         .hero-band {
             padding: 1rem 1.15rem;
             border-radius: 1.25rem;
-            background: linear-gradient(145deg, #0f172a, #1d4ed8);
-            color: #dbeafe;
+            background: linear-gradient(145deg, #2d2926, #208268);
+            color: #e6f9f4;
             box-shadow:
-                0 20px 42px rgba(15, 23, 42, 0.2),
-                0 8px 18px rgba(29, 78, 216, 0.18);
+                0 20px 42px rgba(45, 41, 38, 0.2),
+                0 8px 18px rgba(32, 130, 104, 0.18);
         }
 
         .hero-band strong {
@@ -326,7 +326,7 @@
             text-align: center;
             box-shadow:
                 0 10px 24px rgba(15, 23, 42, 0.07),
-                0 2px 8px rgba(37, 99, 235, 0.05);
+                0 2px 8px rgba(0, 195, 137, 0.05);
         }
 
         .flow-node strong {
@@ -385,7 +385,7 @@
         .code-head {
             padding: 0.8rem 1rem;
             border-bottom: 1px solid rgba(148, 163, 184, 0.16);
-            color: #93c5fd;
+            color: #4fbc86;
             font-size: 0.78rem;
             font-weight: 800;
             text-transform: uppercase;
@@ -590,7 +590,7 @@
         .dot:hover,
         .dot:focus-visible {
             transform: scale(1.18);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+            box-shadow: 0 0 0 3px rgba(0, 195, 137, 0.18);
             outline: none;
         }
 
@@ -599,7 +599,7 @@
         }
 
         .dot.is-complete {
-            background: #93c5fd;
+            background: #4fbc86;
         }
 
         @media (min-width: 1080px) {
@@ -759,7 +759,6 @@
                             <article class="card"><small>Prebid.js</small>
                                 <h3>Client-side auction</h3>
                                 <ul>
-                                    <li>Client-side auction</li>
                                     <li>Bidder adapters run in browser JavaScript.</li>
                                     <li>Each bidder request originates from the page.</li>
                                     <li>Browser cost grows as demand partners increase.</li>
@@ -819,8 +818,7 @@
                                 </div>
                                 <div class="flow-step reveal" data-reveal>
                                     <div class="arrow">→</div>
-                                    <div class="flow-node"><strong>SSPs/Bidders</strong><span>Prebid.js sets targeting
-                                            for the ad server.</span>
+                                    <div class="flow-node"><strong>SSPs/Bidders</strong><span>PBS fans out in parallel and collects bid responses.</span>
                                     </div>
                                 </div>
                                 <div class="flow-step reveal" data-reveal>
@@ -846,7 +844,7 @@
                                 <p>PBS executes server-side bidders; Prebid.js converts responses into ad server
                                     targeting.</p>
                             </article>
-                            <article class="card reveal" data-reveal><small>5–6</small>
+                            <article class="card reveal" data-reveal><small>5</small>
                                 <h3>Delivery + render</h3>
                                 <p>Ad server returns Prebid Universal Creative, which calls `pbjs.renderAd()` for
                                     display.</p>

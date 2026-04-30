@@ -1202,7 +1202,7 @@ function generateOpenRTBRequest() {
       },
     ],
     site: {
-      page: "[example.com](https://example.com/article)",
+      page: "https://example.com/article",
       domain: "example.com",
     },
     device: {
@@ -1216,7 +1216,6 @@ function generateOpenRTBRequest() {
         targeting: {
           pricegranularity: AppState.config.priceGranularity,
         },
-        bidders: enabledBidders.map((b) => b.id),
       },
     },
   };
@@ -1257,11 +1256,6 @@ function generateOpenRTBRequest() {
       key: "pricegranularity",
       comment:
         "How bid prices are bucketed into ad server key-values (e.g. hb_pb)",
-    },
-    {
-      ws: "      ",
-      key: "bidders",
-      comment: "Adapter IDs PBS will call server-side for demand",
     },
   ]);
 }
@@ -1320,22 +1314,45 @@ function annotateJson(json, notes) {
 function priceGranularityRanges(label) {
   switch (label) {
     case "low":
-      return { ranges: [{ max: 5.0, increment: 0.5 }] };
+      return { ranges: [{ min: 0, max: 5.0, increment: 0.5 }] };
     case "high":
-      return { ranges: [{ max: 20.0, increment: 0.01 }] };
+      return { ranges: [{ min: 0, max: 20.0, increment: 0.01 }] };
     case "dense":
       return {
         ranges: [
           { min: 0, max: 3.0, increment: 0.01 },
           { min: 3.0, max: 8.0, increment: 0.05 },
+          { min: 8.0, max: 20.0, increment: 0.5 },
         ],
       };
     case "auto":
-      return "auto";
+      return {
+        ranges: [
+          { min: 0, max: 5.0, increment: 0.05 },
+          { min: 5.0, max: 10.0, increment: 0.1 },
+          { min: 10.0, max: 20.0, increment: 0.5 },
+        ],
+      };
     case "medium":
     default:
-      return { ranges: [{ max: 20.0, increment: 0.1 }] };
+      return { ranges: [{ min: 0, max: 20.0, increment: 0.1 }] };
   }
+}
+
+/**
+ * Bucket a bid price according to Prebid price granularity rules.
+ * Each range uses floor(price / increment) * increment, capped at range.max.
+ */
+function bucketPrice(price, granularity) {
+  const spec = priceGranularityRanges(granularity);
+  const ranges = spec.ranges;
+  for (const range of ranges) {
+    if (price >= range.min && price <= range.max) {
+      const raw = Math.floor(price / range.increment) * range.increment;
+      return parseFloat(raw.toFixed(4)).toFixed(2);
+    }
+  }
+  return ranges[ranges.length - 1].max.toFixed(2);
 }
 
 /**
@@ -1489,7 +1506,7 @@ function generateBidResponse() {
             ext: {
               prebid: {
                 targeting: {
-                  hb_pb: price.toFixed(2),
+                  hb_pb: bucketPrice(price, AppState.config.priceGranularity),
                   hb_bidder: bidder.id,
                   hb_size: "300x250",
                   hb_cache_id: generateRequestId(),
@@ -1839,66 +1856,8 @@ async function runPhase4_PostAuction() {
 
   let validBids = AppState.auction.bids.filter((b) => b.status === "received");
 
-  // Step 1: Floor enforcement
-  DOM.floorCheck.classList.add("active");
-  await delay(500 / AppState.simulation.speed);
-
-  if (AppState.config.floorsEnabled) {
-    const floor = AppState.config.floorPrice;
-    let filtered = 0;
-
-    validBids.forEach((bid) => {
-      // Convert bid to primary currency for floor comparison
-      let priceInPrimary = bid.originalPrice;
-      if (
-        bid.originalCurrency !== AppState.config.primaryCurrency &&
-        AppState.config.currencyConversionEnabled
-      ) {
-        priceInPrimary = convertCurrency(
-          bid.originalPrice,
-          bid.originalCurrency,
-          AppState.config.primaryCurrency,
-        );
-      }
-
-      if (priceInPrimary < floor) {
-        bid.status = "floor";
-        bid.reason = `Bid $${priceInPrimary.toFixed(2)} below floor $${floor.toFixed(2)}`;
-        filtered++;
-
-        // Update table
-        const row = document.getElementById(`bid-row-${bid.bidder.id}`);
-        if (row) {
-          row.children[4].innerHTML =
-            '<span class="status-badge floor">Below Floor</span>';
-        }
-
-        // Update marker
-        const markers = DOM.bidResponses.querySelectorAll(".bid-marker");
-        markers.forEach((marker) => {
-          if (marker.textContent.includes(bid.bidder.name)) {
-            marker.classList.add("floor");
-          }
-        });
-
-        addFeedback(
-          "warning",
-          `${bid.bidder.name} bid rejected: below floor ($${priceInPrimary.toFixed(2)} < $${floor.toFixed(2)})`,
-        );
-      }
-    });
-
-    validBids = validBids.filter((b) => b.status === "received");
-    DOM.floorCheckDetail.textContent = `${filtered} bid(s) below $${floor.toFixed(2)} floor`;
-  } else {
-    DOM.floorCheckDetail.textContent = "Floors disabled";
-  }
-
-  DOM.floorCheck.classList.remove("active");
-  DOM.floorCheck.classList.add("completed");
-  await delay(300 / AppState.simulation.speed);
-
-  // Step 2: Currency conversion
+  // Step 1: Currency conversion — must run before floor enforcement so floors
+  // compare against the ad-server currency, matching real PBS behaviour.
   DOM.currencyConvert.classList.add("active");
   await delay(500 / AppState.simulation.speed);
 
@@ -1935,6 +1894,52 @@ async function runPhase4_PostAuction() {
 
   DOM.currencyConvert.classList.remove("active");
   DOM.currencyConvert.classList.add("completed");
+  await delay(300 / AppState.simulation.speed);
+
+  // Step 2: Floor enforcement — uses already-converted prices for comparison
+  DOM.floorCheck.classList.add("active");
+  await delay(500 / AppState.simulation.speed);
+
+  if (AppState.config.floorsEnabled) {
+    const floor = AppState.config.floorPrice;
+    let filtered = 0;
+
+    validBids.forEach((bid) => {
+      if (bid.convertedPrice < floor) {
+        bid.status = "floor";
+        bid.reason = `Bid $${bid.convertedPrice.toFixed(2)} below floor $${floor.toFixed(2)}`;
+        filtered++;
+
+        // Update table
+        const row = document.getElementById(`bid-row-${bid.bidder.id}`);
+        if (row) {
+          row.children[4].innerHTML =
+            '<span class="status-badge floor">Below Floor</span>';
+        }
+
+        // Update marker
+        const markers = DOM.bidResponses.querySelectorAll(".bid-marker");
+        markers.forEach((marker) => {
+          if (marker.textContent.includes(bid.bidder.name)) {
+            marker.classList.add("floor");
+          }
+        });
+
+        addFeedback(
+          "warning",
+          `${bid.bidder.name} bid rejected: below floor ($${bid.convertedPrice.toFixed(2)} < $${floor.toFixed(2)})`,
+        );
+      }
+    });
+
+    validBids = validBids.filter((b) => b.status === "received");
+    DOM.floorCheckDetail.textContent = `${filtered} bid(s) below $${floor.toFixed(2)} floor`;
+  } else {
+    DOM.floorCheckDetail.textContent = "Floors disabled";
+  }
+
+  DOM.floorCheck.classList.remove("active");
+  DOM.floorCheck.classList.add("completed");
   await delay(300 / AppState.simulation.speed);
 
   // Step 3: Winner selection
