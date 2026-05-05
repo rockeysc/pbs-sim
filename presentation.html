@@ -1002,6 +1002,38 @@
                         </article>
                     </div>
                 </section>
+
+                <section class="slide" data-title="Troubleshooting: Server-Side Requests">
+                    <div class="slide-head">
+                        <span class="eyebrow">Bonus</span>
+                        <h2>Debug server-side bid requests directly in the browser's Network panel.</h2>
+                        <p>Appending <code style="display:inline;padding:0.16rem 0.42rem;border-radius:0.45rem;background:rgba(230,249,244,0.85);color:var(--primary-dark);font-family:var(--font-mono);font-size:0.92em;font-weight:700;">?fspb_debug=true</code> to any Freestar-managed URL enables PBS debug mode, exposing every HTTP call PBS made during the auction under the request's preview tab.</p>
+                    </div>
+                    <div class="slide-body">
+                        <div class="grid-3 reveal span-12" data-reveal>
+                            <article class="card">
+                                <small>Step 1</small>
+                                <h3>Enable debug mode</h3>
+                                <p>Append <code>?fspb_debug=true</code> to the page URL and reload. This signals PBS to include a detailed debug object in the response.</p>
+                            </article>
+                            <article class="card">
+                                <small>Step 2</small>
+                                <h3>Filter network requests</h3>
+                                <p>Open DevTools → Network tab and filter by <code>t13.io/openrtb2</code> to isolate the PBS auction request.</p>
+                            </article>
+                            <article class="card">
+                                <small>Step 3</small>
+                                <h3>Inspect HTTP calls</h3>
+                                <p>Select the request → Preview tab → expand the <code>debug</code> object. Under <code>httpcalls</code>, each bidder's outgoing request and response is listed.</p>
+                            </article>
+                        </div>
+                        <article class="card media-card media-card--large reveal span-12" data-reveal>
+                            <small>Screenshot</small>
+                            <h3>Debug response: httpcalls</h3>
+                            <img src="http_calls.png" alt="DevTools preview tab showing PBS debug httpcalls" style="width:100%;display:block;margin-top:0.7rem;border-radius:0.95rem;border:1px solid rgba(203,213,225,0.82);box-shadow:0 12px 28px rgba(15,23,42,0.16);">
+                        </article>
+                    </div>
+                </section>
             </div>
 
         </section>
