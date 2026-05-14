@@ -658,6 +658,67 @@
             min-width: 700px;
         }
 
+        /* Timeline */
+        .timeline {
+            display: grid;
+            gap: 0.85rem;
+        }
+
+        .tl-item {
+            display: grid;
+            grid-template-columns: 4.5rem 1fr;
+            gap: 1rem;
+            align-items: start;
+            position: relative;
+        }
+
+        .tl-item:not(:last-child)::before {
+            content: '';
+            position: absolute;
+            left: calc(2.25rem - 1px);
+            top: 1.7rem;
+            bottom: -0.85rem;
+            width: 2px;
+            background: linear-gradient(180deg, rgba(0, 195, 137, 0.45), rgba(0, 195, 137, 0.04));
+            border-radius: 1px;
+        }
+
+        .tl-marker {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.38rem;
+            padding-top: 0.2rem;
+        }
+
+        .tl-dot {
+            width: 0.88rem;
+            height: 0.88rem;
+            flex-shrink: 0;
+            border-radius: 50%;
+            background: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 195, 137, 0.2), 0 0 0 6px rgba(0, 195, 137, 0.07);
+        }
+
+        .tl-year {
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+            text-align: center;
+            line-height: 1.2;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        @keyframes timelineIn {
+            0% { opacity: 0; transform: translate3d(28px, 10px, 0) scale(0.985); filter: blur(3px); }
+            60% { opacity: 1; transform: translate3d(-3px, -2px, 0) scale(1); filter: blur(0); }
+            100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: blur(0); }
+        }
+
+        .tl-item.reveal { transform: translate3d(28px, 10px, 0) scale(0.985); }
+        .tl-item.reveal.is-visible { animation: timelineIn 520ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+
         @media (max-width: 860px) {
 
             .grid-2,
@@ -723,7 +784,51 @@
 
         <section class="slide-frame">
             <div class="slide-stage">
-                <section class="slide is-active" data-title="What Prebid Server is">
+                <section class="slide is-active" data-title="History of Prebid Server">
+                    <div class="slide-head">
+                        <span class="eyebrow">Background</span>
+                        <h2>Prebid Server was built to solve the limits of browser-side header bidding.</h2>
+                        <p>What started as a fix for page latency and mobile limitations has grown into the foundation of modern programmatic infrastructure.</p>
+                    </div>
+                    <div class="slide-body">
+                        <div class="timeline span-12">
+                            <div class="tl-item reveal" data-reveal>
+                                <div class="tl-marker"><div class="tl-dot"></div><span class="tl-year">2014–2016</span></div>
+                                <article class="card"><small>The starting point</small>
+                                    <h3>Waterfall ends, header bidding begins</h3>
+                                    <p>Publishers abandoned sequential waterfall auctions for simultaneous header bidding. Prebid.js launched in 2015 as the open-source standard—but browser costs quickly became a problem: too many bid requests, slower pages, and no clean path for mobile.</p>
+                                </article>
+                            </div>
+                            <div class="tl-item reveal" data-reveal>
+                                <div class="tl-marker"><div class="tl-dot"></div><span class="tl-year">2017</span></div>
+                                <article class="card"><small>PBS launches</small>
+                                    <h3>Move the auction off the page</h3>
+                                    <p>Instead of the browser calling 20 bidders, it calls one PBS endpoint—PBS fans out server-side. Two implementations emerged: <strong>PBS-Go</strong> (AppNexus, built for concurrency) and <strong>PBS-Java</strong> (Rubicon Project, built for enterprise scale).</p>
+                                </article>
+                            </div>
+                            <div class="tl-item reveal" data-reveal>
+                                <div class="tl-marker"><div class="tl-dot"></div><span class="tl-year">2019–2021</span></div>
+                                <article class="card"><small>Industry shift</small>
+                                    <h3>Hybrid becomes the standard</h3>
+                                    <p>Most publishers combined both: high-performing bidders stay client-side, latency-heavy or long-tail demand moves server-side. This balanced match rates, CPMs, page speed, and cost—and remains the dominant model today.</p>
+                                </article>
+                            </div>
+                            <div class="tl-item reveal" data-reveal>
+                                <div class="tl-marker"><div class="tl-dot"></div><span class="tl-year">Key tech</span></div>
+                                <article class="card"><small>Technical milestones</small>
+                                    <h3>What PBS introduced</h3>
+                                    <ul>
+                                        <li>Stored requests — lightweight IDs replace large browser payloads</li>
+                                        <li>OpenRTB standardization across exchanges</li>
+                                        <li>Centralized bidder management and cloud-hosted infrastructure</li>
+                                    </ul>
+                                </article>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="slide" data-title="What Prebid Server is">
                     <div class="slide-head">
                         <span class="eyebrow">Foundation</span>
                         <h2>Prebid Server is an open-source solution for server-to-server header bidding. </h2>
@@ -752,11 +857,6 @@
                                 <p>PBS standardizes bid responses, applies currency conversion and caching, and returns
                                     them to Prebid.js for auction logic and targeting.</p>
                             </article>
-                        </div>
-                        <div class="card reveal span-12" data-reveal><small>Important boundary</small>
-                            <p>The browser (via Prebid.js) owns the ad server targeting handoff and final rendering.
-                                After PBS returns bids, Prebid.js sets targeting for the ad server, and creatives are
-                                rendered in the browser, typically via Prebid Universal Creative.</p>
                         </div>
                         <div class="card reveal span-12" data-reveal><small>Prebid Universal Creative</small>
                             <p>The <strong>Prebid Universal Creative (PUC)</strong> is a JS snippet trafficked on every Prebid line item in the ad server. When a Prebid line item wins, the PUC reads Prebid.js targeting keys, retrieves the cached bid, and renders it—one creative that handles all bidders and all formats.</p>
@@ -796,9 +896,7 @@
                             </article>
                         </div>
                         <div class="card reveal span-4" data-reveal><small>What stays the same</small>
-                            <p>Both approaches converge on the same ad server path: Prebid targeting is set on the page,
-                                the ad server selects a line item, and Prebid Universal Creative invokes
-                                `pbjs.renderAd()` when a Prebid line item wins.</p>
+                            <p>Regardless of where bidders run, Prebid.js still sets ad server targeting and owns the final auction decision.</p>
                         </div>
                         <div class="grid-3 reveal span-12" data-reveal>
                             <article class="card"><small>Latency</small>
@@ -873,11 +971,6 @@
                             </article>
                         </div>
 
-                        <div class="card reveal span-4" data-reveal>
-                            <small>Technical note</small>
-                            <p>The winning creative or cache reference returns to the browser, but rendering happens
-                                in-browser after the ad server response.</p>
-                        </div>
                     </div>
                 </section>
 
@@ -903,10 +996,8 @@
   }]
 });</code></pre>
                         </div>
-                        <div class="card reveal span-4" data-reveal><small>Sequence</small>
-                            <p>Client trigger → Prebid.js sends OpenRTB request via PBS adapter → PBS validates request
-                                and executes server-side bidders → normalized bids return to Prebid.js → page sets ad
-                                server targeting.</p>
+                        <div class="card reveal span-4" data-reveal><small>How it fits in</small>
+                            <p>Prebid.js reads `s2sConfig` at auction time and routes the listed bidders through a single OpenRTB request to the PBS endpoint instead of calling them directly from the browser.</p>
                         </div>
                         <div class="grid-3 reveal span-12" data-reveal>
                             <article class="card"><small>Routing</small>
@@ -1034,6 +1125,48 @@
                         </article>
                     </div>
                 </section>
+                <section class="slide" data-title="Misconceptions & Why PBS Matters">
+                    <div class="slide-head">
+                        <span class="eyebrow">Recap</span>
+                        <h2>Common misconceptions — and why Prebid Server still matters.</h2>
+                        <p>Server-side bidding isn't a replacement for client-side. Understanding the tradeoffs explains why hybrid has become the industry standard.</p>
+                    </div>
+                    <div class="slide-body">
+                        <div class="grid-2 reveal span-12" data-reveal>
+                            <article class="card"><small>Misconception 1</small>
+                                <h3>"Server-side is always better"</h3>
+                                <p>Not necessarily. Moving bidders server-side comes with real tradeoffs:</p>
+                                <ul>
+                                    <li>Reduced cookie match rates</li>
+                                    <li>Lower user ID fidelity</li>
+                                    <li>Less browser signal access</li>
+                                </ul>
+                                <p style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid rgba(203,213,225,0.5);color:var(--text-muted);font-size:0.88rem;">That's why hybrid setups remain dominant.</p>
+                            </article>
+                            <article class="card"><small>Misconception 2</small>
+                                <h3>"Prebid Server replaced Prebid.js"</h3>
+                                <p>It didn't. Most publishers still use all of these together:</p>
+                                <ul>
+                                    <li>Prebid.js</li>
+                                    <li>Prebid Server</li>
+                                    <li>Ad server integrations</li>
+                                    <li>Identity frameworks</li>
+                                </ul>
+                            </article>
+                        </div>
+                        <div class="hero-band reveal span-12" data-reveal>
+                            <strong>Why Prebid Server became important</strong>
+                            <ul style="margin:0.65rem 0 0;padding-left:1.1rem;display:grid;gap:0.4rem;color:#b3ead8;">
+                                <li>Scaled header bidding beyond browser limits</li>
+                                <li>Enabled mobile and app monetization</li>
+                                <li>Reduced frontend complexity</li>
+                                <li>Standardized server-side auctions via OpenRTB</li>
+                                <li>Prepared publishers for privacy-driven web changes</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
             </div>
 
         </section>
