@@ -711,13 +711,32 @@
         }
 
         @keyframes timelineIn {
-            0% { opacity: 0; transform: translate3d(28px, 10px, 0) scale(0.985); filter: blur(3px); }
-            60% { opacity: 1; transform: translate3d(-3px, -2px, 0) scale(1); filter: blur(0); }
-            100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: blur(0); }
+            0% {
+                opacity: 0;
+                transform: translate3d(28px, 10px, 0) scale(0.985);
+                filter: blur(3px);
+            }
+
+            60% {
+                opacity: 1;
+                transform: translate3d(-3px, -2px, 0) scale(1);
+                filter: blur(0);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translate3d(0, 0, 0) scale(1);
+                filter: blur(0);
+            }
         }
 
-        .tl-item.reveal { transform: translate3d(28px, 10px, 0) scale(0.985); }
-        .tl-item.reveal.is-visible { animation: timelineIn 520ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+        .tl-item.reveal {
+            transform: translate3d(28px, 10px, 0) scale(0.985);
+        }
+
+        .tl-item.reveal.is-visible {
+            animation: timelineIn 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
 
         @media (max-width: 860px) {
 
@@ -754,7 +773,6 @@
     <header class="topbar">
         <div>
             <h1>Prebid Server Technical Presentation</h1>
-            <p>Minimal slide deck with click-to-reveal steps.</p>
         </div>
         <a class="back-link" href="landing.html">← Learning Hub</a>
     </header>
@@ -788,33 +806,50 @@
                     <div class="slide-head">
                         <span class="eyebrow">Background</span>
                         <h2>Prebid Server was built to solve the limits of browser-side header bidding.</h2>
-                        <p>What started as a fix for page latency and mobile limitations has grown into the foundation of modern programmatic infrastructure.</p>
+                        <p>What started as a fix for page latency and mobile limitations has grown into the foundation
+                            of modern programmatic infrastructure.</p>
                     </div>
                     <div class="slide-body">
                         <div class="timeline span-12">
                             <div class="tl-item reveal" data-reveal>
-                                <div class="tl-marker"><div class="tl-dot"></div><span class="tl-year">2014–2016</span></div>
+                                <div class="tl-marker">
+                                    <div class="tl-dot"></div><span class="tl-year">2014–2016</span>
+                                </div>
                                 <article class="card"><small>The starting point</small>
                                     <h3>Waterfall ends, header bidding begins</h3>
-                                    <p>Publishers abandoned sequential waterfall auctions for simultaneous header bidding. Prebid.js launched in 2015 as the open-source standard—but browser costs quickly became a problem: too many bid requests, slower pages, and no clean path for mobile.</p>
+                                    <p>Publishers abandoned sequential waterfall auctions for simultaneous header
+                                        bidding. Prebid.js launched in 2015 as the open-source standard—but browser
+                                        costs quickly became a problem: too many bid requests, slower pages, and no
+                                        clean path for mobile.</p>
                                 </article>
                             </div>
                             <div class="tl-item reveal" data-reveal>
-                                <div class="tl-marker"><div class="tl-dot"></div><span class="tl-year">2017</span></div>
+                                <div class="tl-marker">
+                                    <div class="tl-dot"></div><span class="tl-year">2017</span>
+                                </div>
                                 <article class="card"><small>PBS launches</small>
                                     <h3>Move the auction off the page</h3>
-                                    <p>Instead of the browser calling 20 bidders, it calls one PBS endpoint—PBS fans out server-side. Two implementations emerged: <strong>PBS-Go</strong> (AppNexus, built for concurrency) and <strong>PBS-Java</strong> (Rubicon Project, built for enterprise scale).</p>
+                                    <p>Instead of the browser calling 20 bidders, it calls one PBS endpoint—PBS fans out
+                                        server-side. Two implementations emerged: <strong>PBS-Go</strong> (AppNexus,
+                                        built for concurrency) and <strong>PBS-Java</strong> (Rubicon Project, built for
+                                        enterprise scale).</p>
                                 </article>
                             </div>
                             <div class="tl-item reveal" data-reveal>
-                                <div class="tl-marker"><div class="tl-dot"></div><span class="tl-year">2019–2021</span></div>
+                                <div class="tl-marker">
+                                    <div class="tl-dot"></div><span class="tl-year">2019–2021</span>
+                                </div>
                                 <article class="card"><small>Industry shift</small>
                                     <h3>Hybrid becomes the standard</h3>
-                                    <p>Most publishers combined both: high-performing bidders stay client-side, latency-heavy or long-tail demand moves server-side. This balanced match rates, CPMs, page speed, and cost—and remains the dominant model today.</p>
+                                    <p>Most publishers combined both: high-performing bidders stay client-side,
+                                        latency-heavy or long-tail demand moves server-side. This balanced match rates,
+                                        CPMs, page speed, and cost—and remains the dominant model today.</p>
                                 </article>
                             </div>
                             <div class="tl-item reveal" data-reveal>
-                                <div class="tl-marker"><div class="tl-dot"></div><span class="tl-year">Key tech</span></div>
+                                <div class="tl-marker">
+                                    <div class="tl-dot"></div><span class="tl-year">Key tech</span>
+                                </div>
                                 <article class="card"><small>Technical milestones</small>
                                     <h3>What PBS introduced</h3>
                                     <ul>
@@ -859,8 +894,16 @@
                             </article>
                         </div>
                         <div class="card reveal span-12" data-reveal><small>Prebid Universal Creative</small>
-                            <p>The <strong>Prebid Universal Creative (PUC)</strong> is a JS snippet trafficked on every Prebid line item in the ad server. When a Prebid line item wins, the PUC reads Prebid.js targeting keys, retrieves the cached bid, and renders it—one creative that handles all bidders and all formats.</p>
-                            <p style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid rgba(203,213,225,0.5);color:var(--text-muted);font-size:0.88rem;"><strong style="color:var(--text-secondary);">In plain English:</strong> The ad server only knows one trick — run this one little script. That script is the PUC, and its job is to look up whichever ad won the auction and actually put it on the page. It's the universal adapter between the ad server and every possible ad format.</p>
+                            <p>The <strong>Prebid Universal Creative (PUC)</strong> is a JS snippet trafficked on every
+                                Prebid line item in the ad server. When a Prebid line item wins, the PUC reads Prebid.js
+                                targeting keys, retrieves the cached bid, and renders it—one creative that handles all
+                                bidders and all formats.</p>
+                            <p
+                                style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid rgba(203,213,225,0.5);color:var(--text-muted);font-size:0.88rem;">
+                                <strong style="color:var(--text-secondary);">In plain English:</strong> The ad server
+                                only knows one trick — run this one little script. That script is the PUC, and its job
+                                is to look up whichever ad won the auction and actually put it on the page. It's the
+                                universal adapter between the ad server and every possible ad format.</p>
                         </div>
                     </div>
                 </section>
@@ -896,7 +939,8 @@
                             </article>
                         </div>
                         <div class="card reveal span-4" data-reveal><small>What stays the same</small>
-                            <p>Regardless of where bidders run, Prebid.js still sets ad server targeting and owns the final auction decision.</p>
+                            <p>Regardless of where bidders run, Prebid.js still sets ad server targeting and owns the
+                                final auction decision.</p>
                         </div>
                         <div class="grid-3 reveal span-12" data-reveal>
                             <article class="card"><small>Latency</small>
@@ -925,33 +969,37 @@
                         <div class="flow-card span-12">
                             <small>Flow chart</small>
                             <div class="flow-scroll-wrap">
-                            <div class="flow-row">
-                                <div class="flow-step reveal" data-reveal>
-                                    <div class="flow-node"><strong>Browser</strong><span>Prebid.js routes bidders via
-                                            s2sConfig</span></div>
-                                </div>
-                                <div class="flow-step reveal" data-reveal>
-                                    <div class="arrow">→</div>
-                                    <div class="flow-node"><strong>Prebid Server</strong><span>PBS executes bidder calls
-                                            and returns bids.</span></div>
-                                </div>
-                                <div class="flow-step reveal" data-reveal>
-                                    <div class="arrow">→</div>
-                                    <div class="flow-node"><strong>SSPs/Bidders</strong><span>PBS fans out in parallel and collects bid responses.</span>
+                                <div class="flow-row">
+                                    <div class="flow-step reveal" data-reveal>
+                                        <div class="flow-node"><strong>Browser</strong><span>Prebid.js routes bidders
+                                                via
+                                                s2sConfig</span></div>
+                                    </div>
+                                    <div class="flow-step reveal" data-reveal>
+                                        <div class="arrow">→</div>
+                                        <div class="flow-node"><strong>Prebid Server</strong><span>PBS executes bidder
+                                                calls
+                                                and returns bids.</span></div>
+                                    </div>
+                                    <div class="flow-step reveal" data-reveal>
+                                        <div class="arrow">→</div>
+                                        <div class="flow-node"><strong>SSPs/Bidders</strong><span>PBS fans out in
+                                                parallel and collects bid responses.</span>
+                                        </div>
+                                    </div>
+                                    <div class="flow-step reveal" data-reveal>
+                                        <div class="arrow">→</div>
+                                        <div class="flow-node"><strong>Ad Server</strong><span>The ad server returns
+                                                Prebid Universal Creative</span>
+                                        </div>
+                                    </div>
+                                    <div class="flow-step reveal" data-reveal>
+                                        <div class="arrow">→</div>
+                                        <div class="flow-node"><strong>PUC</strong><span>pbjs.renderAd() renders the
+                                                winning
+                                                ad.</span></div>
                                     </div>
                                 </div>
-                                <div class="flow-step reveal" data-reveal>
-                                    <div class="arrow">→</div>
-                                    <div class="flow-node"><strong>Ad Server</strong><span>The ad server returns
-                                            Prebid Universal Creative</span>
-                                    </div>
-                                </div>
-                                <div class="flow-step reveal" data-reveal>
-                                    <div class="arrow">→</div>
-                                    <div class="flow-node"><strong>PUC</strong><span>pbjs.renderAd() renders the winning
-                                            ad.</span></div>
-                                </div>
-                            </div>
                             </div>
                         </div>
                         <div class="grid-3 span-8 staged-grid">
@@ -997,7 +1045,9 @@
 });</code></pre>
                         </div>
                         <div class="card reveal span-4" data-reveal><small>How it fits in</small>
-                            <p>Prebid.js reads `s2sConfig` at auction time and routes the listed bidders through a single OpenRTB request to the PBS endpoint instead of calling them directly from the browser.</p>
+                            <p>Prebid.js reads `s2sConfig` at auction time and routes the listed bidders through a
+                                single OpenRTB request to the PBS endpoint instead of calling them directly from the
+                                browser.</p>
                         </div>
                         <div class="grid-3 reveal span-12" data-reveal>
                             <article class="card"><small>Routing</small>
@@ -1098,30 +1148,37 @@
                     <div class="slide-head">
                         <span class="eyebrow">Bonus</span>
                         <h2>Debug server-side bid requests directly in the browser's Network panel.</h2>
-                        <p>Appending <code style="display:inline;padding:0.16rem 0.42rem;border-radius:0.45rem;background:rgba(230,249,244,0.85);color:var(--primary-dark);font-family:var(--font-mono);font-size:0.92em;font-weight:700;">?fspb_debug=true</code> to any Freestar-managed URL enables PBS debug mode, exposing every HTTP call PBS made during the auction under the request's preview tab.</p>
+                        <p>Appending <code
+                                style="display:inline;padding:0.16rem 0.42rem;border-radius:0.45rem;background:rgba(230,249,244,0.85);color:var(--primary-dark);font-family:var(--font-mono);font-size:0.92em;font-weight:700;">?fspb_debug=true</code>
+                            to any Freestar-managed URL enables PBS debug mode, exposing every HTTP call PBS made during
+                            the auction under the request's preview tab.</p>
                     </div>
                     <div class="slide-body">
                         <div class="grid-3 reveal span-12" data-reveal>
                             <article class="card">
                                 <small>Step 1</small>
                                 <h3>Enable debug mode</h3>
-                                <p>Append <code>?fspb_debug=true</code> to the page URL and reload. This signals PBS to include a detailed debug object in the response.</p>
+                                <p>Append <code>?fspb_debug=true</code> to the page URL and reload. This signals PBS to
+                                    include a detailed debug object in the response.</p>
                             </article>
                             <article class="card">
                                 <small>Step 2</small>
                                 <h3>Filter network requests</h3>
-                                <p>Open DevTools → Network tab and filter by <code>t13.io/openrtb2</code> to isolate the PBS auction request.</p>
+                                <p>Open DevTools → Network tab and filter by <code>t13.io/openrtb2</code> to isolate the
+                                    PBS auction request.</p>
                             </article>
                             <article class="card">
                                 <small>Step 3</small>
                                 <h3>Inspect HTTP calls</h3>
-                                <p>Select the request → Preview tab → expand the <code>debug</code> object. Under <code>httpcalls</code>, each bidder's outgoing request and response is listed.</p>
+                                <p>Select the request → Preview tab → expand the <code>debug</code> object. Under
+                                    <code>httpcalls</code>, each bidder's outgoing request and response is listed.</p>
                             </article>
                         </div>
                         <article class="card media-card media-card--large reveal span-12" data-reveal>
                             <small>Screenshot</small>
                             <h3>Debug response: httpcalls</h3>
-                            <img src="http_calls.png" alt="DevTools preview tab showing PBS debug httpcalls" style="width:100%;display:block;margin-top:0.7rem;border-radius:0.95rem;border:1px solid rgba(203,213,225,0.82);box-shadow:0 12px 28px rgba(15,23,42,0.16);">
+                            <img src="http_calls.png" alt="DevTools preview tab showing PBS debug httpcalls"
+                                style="width:100%;display:block;margin-top:0.7rem;border-radius:0.95rem;border:1px solid rgba(203,213,225,0.82);box-shadow:0 12px 28px rgba(15,23,42,0.16);">
                         </article>
                     </div>
                 </section>
@@ -1129,7 +1186,8 @@
                     <div class="slide-head">
                         <span class="eyebrow">Recap</span>
                         <h2>Common misconceptions — and why Prebid Server still matters.</h2>
-                        <p>Server-side bidding isn't a replacement for client-side. Understanding the tradeoffs explains why hybrid has become the industry standard.</p>
+                        <p>Server-side bidding isn't a replacement for client-side. Understanding the tradeoffs explains
+                            why hybrid has become the industry standard.</p>
                     </div>
                     <div class="slide-body">
                         <div class="grid-2 reveal span-12" data-reveal>
@@ -1141,7 +1199,9 @@
                                     <li>Lower user ID fidelity</li>
                                     <li>Less browser signal access</li>
                                 </ul>
-                                <p style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid rgba(203,213,225,0.5);color:var(--text-muted);font-size:0.88rem;">That's why hybrid setups remain dominant.</p>
+                                <p
+                                    style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid rgba(203,213,225,0.5);color:var(--text-muted);font-size:0.88rem;">
+                                    That's why hybrid setups remain dominant.</p>
                             </article>
                             <article class="card"><small>Misconception 2</small>
                                 <h3>"Prebid Server replaced Prebid.js"</h3>
